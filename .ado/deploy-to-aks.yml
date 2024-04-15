@@ -5,12 +5,12 @@ resources:
   - repo: self
 
 variables:
-  dockerRegistryServiceConnection: 'myACRServiceConnection'
+  dockerRegistryServiceConnection: 'myACR'
   imageRepository: 'redis'
-  containerRegistry: 'myContainerRegistry.azurecr.io'
+  containerRegistry: 'crry6vhgxwxv45m.azurecr.io'
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
-  imagePullSecret: 'myACRImagePullSecret'
+  imagePullSecret: 'imagePullSCRT'
 
 stages:
   - stage: Build
@@ -50,14 +50,12 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: Kubernetes@1
+                - task: KubernetesManifest@0
                   displayName: Create imagePullSecret
                   inputs:
-                    connectionType: 'Kubernetes Service Connection'
-                    namespace: 'default'
-                    secretType: 'dockerRegistry'
-                    secretName: '$(imagePullSecret)'
-                    dockerRegistryEndpoint: '$(dockerRegistryServiceConnection)'
+                    action: createSecret
+                    secretName: $(imagePullSecret)
+                    dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
                     
                 - task: KubernetesManifest@0
                   displayName: Deploy to AKS
@@ -68,22 +66,4 @@ stages:
                       apiVersion: apps/v1
                       kind: Deployment
                       metadata:
-                        name: redis 
-                      spec:
-                        replicas: 1
-                        selector:
-                          matchLabels:
-                            app: redis
-                        template:
-                          metadata:
-                            labels:
-                              app: redis
-                          spec:
-                            containers:
-                            - name: redis
-                              image: $(containerRegistry)/$(imageRepository):$(tag)
-                              ports:
-                              - containerPort: 6379
-                            imagePullSecrets:
-                            - name: $(imagePullSecret)
-                    imagePullSecrets: '$(imagePullSecret)'
+                        name: redis
