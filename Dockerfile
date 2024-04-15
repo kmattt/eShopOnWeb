@@ -1,33 +1,11 @@
-# Use the official .NET 8 SDK image as the build environment
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM redis:latest
 
-# Set the working directory in the container
-WORKDIR /app
+# Set a non-root user to run the container
+RUN groupadd -r redis && useradd -r -g redis redis
+USER redis
 
-# Copy the solution file and restore dependencies
-# Copying only the essential files for restore to optimize caching
-COPY *.sln .
-COPY eShopOnWeb.sln .
-COPY src/*/*.csproj ./src/
-RUN dotnet restore eShopOnWeb.sln
+# Expose the Redis port
+EXPOSE 6379
 
-# Copy the remaining source code
-COPY src/. ./src/
-
-# Build the application with Release configuration
-RUN dotnet publish -c Release -o out
-
-# Use the official ASP.NET Core 8 runtime image as the base for the runtime environment
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the published output from the build environment to the runtime environment
-COPY --from=build /app/out .
-
-# Expose the default ASP.NET Core port
-EXPOSE 80
-
-# Set the entry point for the container
-ENTRYPOINT ["dotnet", "YourAppName.dll"]
+# Set the entrypoint to run Redis server
+ENTRYPOINT ["redis-server"]
