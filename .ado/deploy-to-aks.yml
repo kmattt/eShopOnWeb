@@ -1,0 +1,89 @@
+trigger:
+  - main
+
+resources:
+  - repo: self
+
+variables:
+  dockerRegistryServiceConnection: 'myACRServiceConnection'
+  imageRepository: 'redis'
+  containerRegistry: 'myContainerRegistry.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: '$(Build.BuildId)'
+  imagePullSecret: 'myACRImagePullSecret'
+
+stages:
+  - stage: Build
+    displayName: Build and push stage
+    jobs:
+      - job: Build
+        displayName: Build job
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: Docker@2
+            displayName: Pull redis image
+            inputs:
+              command: pull
+              arguments: redis
+          
+          - task: Docker@2
+            displayName: Build and push image to ACR
+            inputs:
+              command: buildAndPush
+              repository: $(imageRepository)
+              dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(tag)
+                latest
+
+  - stage: Deploy
+    displayName: Deploy to AKS
+    jobs:
+      - deployment: Deploy
+        displayName: Deploy job
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: Kubernetes@1
+                  displayName: Create imagePullSecret
+                  inputs:
+                    connectionType: 'Kubernetes Service Connection'
+                    namespace: 'default'
+                    secretType: 'dockerRegistry'
+                    secretName: '$(imagePullSecret)'
+                    dockerRegistryEndpoint: '$(dockerRegistryServiceConnection)'
+                    
+                - task: KubernetesManifest@0
+                  displayName: Deploy to AKS
+                  inputs:
+                    action: 'deploy'
+                    namespace: 'default'
+                    manifests: |
+                      apiVersion: apps/v1
+                      kind: Deployment
+                      metadata:
+                        name: redis 
+                      spec:
+                        replicas: 1
+                        selector:
+                          matchLabels:
+                            app: redis
+                        template:
+                          metadata:
+                            labels:
+                              app: redis
+                          spec:
+                            containers:
+                            - name: redis
+                              image: $(containerRegistry)/$(imageRepository):$(tag)
+                              ports:
+                              - containerPort: 6379
+                            imagePullSecrets:
+                            - name: $(imagePullSecret)
+                    imagePullSecrets: '$(imagePullSecret)'
