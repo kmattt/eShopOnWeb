@@ -78,26 +78,4 @@ stages:
                     action: 'deploy'
                     kubernetesServiceConnection: 'myaks'
                     namespace: 'default'
-                    manifests: |
-                      apiVersion: apps/v1
-                      kind: Deployment
-                      metadata:
-                        name: redis 
-                      spec:
-                        replicas: 1
-                        selector:
-                          matchLabels:
-                            app: redis
-                        template:
-                          metadata:
-                            labels:
-                              app: redis
-                          spec:
-                            containers:
-                            - name: redis
-                              image: $(containerRegistry)/$(imageRepository):$(tag)
-                              ports:
-                              - containerPort: 6379
-                            imagePullSecrets:
-                            - name: $(imagePullSecret)
-                    imagePullSecrets: '$(imagePullSecret)'
+                    manifests: testing.yml
