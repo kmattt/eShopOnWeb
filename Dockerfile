@@ -5,8 +5,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the project file and restore dependencies
-COPY MySolution.sln .
-RUN dotnet restore MySolution.sln 
+COPY eShopOnWeb.sln .
+RUN dotnet restore eShopOnWeb.sln
 
 # Copy the remaining source code
 COPY . ./
