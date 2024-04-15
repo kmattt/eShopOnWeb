@@ -1,10 +1,4 @@
-trigger:
-  branches:
-    include:
-    - main
-  paths:
-    include:
-    - src/web/*
+
 
 resources:
   repositories:
@@ -19,12 +13,22 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
+    - checkout: self
+      fetchDepth: 0
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
         command: 'restore'
         projects: '**/*.sln'
         feedsToUse: 'select'
+    
+    - task: SonarCloudPrepare@1
+      inputs:
+        SonarCloud: 'SonarCloud'
+        organization: 'kurzynmat03811'
+        scannerMode: 'MSBuild'
+        projectKey: 'kurzynmat03811_eShopOnWeb'
+        projectName: 'eShopOnWeb'
 
     - task: DotNetCoreCLI@2
       displayName: Build
@@ -37,6 +41,12 @@ stages:
       inputs:
         command: 'test'
         projects: 'tests/UnitTests/*.csproj'
+
+    - task: SonarCloudAnalyze@1
+    
+    - task: SonarCloudPublish@1
+      inputs:
+        pollingTimeoutSec: '300'
     
     - task: DotNetCoreCLI@2
       displayName: Publish
@@ -57,3 +67,5 @@ stages:
         PathtoPublish: '$(Build.SourcesDirectory)/infra/webapp.bicep'
         ArtifactName: 'Bicep'
         publishLocation: 'Container'
+    
+
