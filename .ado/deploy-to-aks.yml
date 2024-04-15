@@ -65,9 +65,12 @@ stages:
                 - task: KubernetesManifest@0
                   displayName: Create imagePullSecret
                   inputs:
-                    action: createSecret
-                    secretName: $(imagePullSecret)
-                    dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+                    action: 'createSecret'
+                    kubernetesServiceConnection: 'myaks'
+                    namespace: 'default'
+                    secretType: 'dockerRegistry'
+                    secretName: '$(imagePullSecret)'
+                    dockerRegistryEndpoint: '$(dockerRegistryServiceConnection)'
                     
                 - task: KubernetesManifest@0
                   displayName: Deploy to AKS
