@@ -1,19 +1,14 @@
-
-
 resources:
   repositories:
     - repository: self
       trigger: none
-
-pool: Default
 
 stages:
 - stage: Build
   displayName: Build .Net Core Solution
   jobs:
   - job: Build
-    pool:
-      vmImage: ubuntu-latest
+    pool: Default
     steps:
     - checkout: self
       fetchDepth: 0
