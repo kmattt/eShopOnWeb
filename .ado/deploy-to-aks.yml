@@ -1,9 +1,6 @@
 trigger:
   - main
 
-resources:
-  - repo: self
-
 variables:
   dockerRegistryServiceConnection: 'myACR'
   imageRepository: 'redis'
