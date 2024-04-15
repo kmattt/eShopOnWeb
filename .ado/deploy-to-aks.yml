@@ -8,7 +8,7 @@ variables:
   dockerRegistryServiceConnection: 'myACR'
   imageRepository: 'redis'
   containerRegistry: 'crry6vhgxwxv45m.azurecr.io'
-  dockerfilePath: '**/Dockerfile'
+  dockerfilePath: '*/Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'imagePullSCRT'
 
@@ -34,11 +34,21 @@ stages:
               arguments: redis
           
           - task: Docker@2
-            displayName: Build and push image to ACR
+            displayName: Build Docker image
             inputs:
-              command: buildAndPush
+              command: build
               repository: $(imageRepository)
               dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(tag)
+                latest
+
+          - task: Docker@2
+            displayName: Push image to ACR
+            inputs:
+              command: push
+              repository: $(imageRepository)
               containerRegistry: $(dockerRegistryServiceConnection)
               tags: |
                 $(tag)
