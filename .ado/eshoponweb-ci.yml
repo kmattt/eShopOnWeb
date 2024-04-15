@@ -3,7 +3,7 @@ resources:
     - repository: self
       trigger: none
 pool:
-  name: Default
+  name: selfhostedpool
   demands:
   - agent.name -equals selfhostedvm
 
