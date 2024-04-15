@@ -8,7 +8,10 @@ stages:
   displayName: Build .Net Core Solution
   jobs:
   - job: Build
-    pool: Default
+    pool:
+      name: Default
+      demands:
+      - agent.name -equals selfhostedvm
     steps:
     - checkout: self
       fetchDepth: 0
