@@ -39,8 +39,8 @@ stages:
               containerRegistry: '$(dockerRegistryServiceConnection)'
               repository: '$(imageRepository)'
               command: 'build'
-              Dockerfile: 'Dockerfile'
-              buildContext: 'eShopOnWeb.sln'
+              Dockerfile: '**/Dockerfile'
+              buildContext: '**'
               tags: |
                 $(tag)
                 latest
