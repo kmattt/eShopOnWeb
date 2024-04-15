@@ -6,7 +6,7 @@ variables:
   imageRepository: 'redis'
   containerRegistry: 'crry6vhgxwxv45m.azurecr.io'
   tag: '$(Build.BuildId)'
-  imagePullSecret: 'imagePullSCRT'
+  imagePullSecret: 'imagepullsecret'
 
 stages:
   - stage: Build
