@@ -13,7 +13,7 @@ stages:
   jobs:
   - job: Build
     pool:
-      name: Default
+      name: selfhostedpool
       demands:
       - agent.name -equals selfhostedvm
     steps:
