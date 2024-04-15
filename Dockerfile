@@ -5,8 +5,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy the project file and restore dependencies
-COPY *.csproj ./
-RUN dotnet restore
+COPY MySolution.sln .
+RUN dotnet restore MySolution.sln 
 
 # Copy the remaining source code
 COPY . ./
