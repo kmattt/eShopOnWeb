@@ -4,7 +4,7 @@ resources:
   repositories:
     - repository: self
       trigger: none
-
+pool: EShopPool
 stages:
 - stage: Build
   displayName: Build .Net Core Solution
