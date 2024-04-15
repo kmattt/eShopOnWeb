@@ -4,12 +4,15 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the project file and restore dependencies
+# Copy the solution file and restore dependencies
+# Copying only the essential files for restore to optimize caching
+COPY *.sln .
 COPY eShopOnWeb.sln .
+COPY src/*/*.csproj ./src/
 RUN dotnet restore eShopOnWeb.sln
 
 # Copy the remaining source code
-COPY . ./
+COPY src/. ./src/
 
 # Build the application with Release configuration
 RUN dotnet publish -c Release -o out
