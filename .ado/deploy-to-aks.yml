@@ -23,6 +23,8 @@ stages:
           demands:
           - agent.name -equals shubuntu
         steps:
+          - checkout: self
+            fetchDepth: 0
           - task: Docker@2
             displayName: Pull redis image
             inputs:
