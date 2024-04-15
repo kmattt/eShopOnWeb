@@ -14,9 +14,7 @@ stages:
   jobs:
   - job: Build
     pool:
-      name: selfhostedpool
-      demands:
-      - agent.name -equals selfhostedubuntu
+      vmImage: 'ubuntu-latest'
     steps:
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: Deploy ACR using Bicep
