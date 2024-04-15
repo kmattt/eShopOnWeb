@@ -76,6 +76,7 @@ stages:
                   displayName: Deploy to AKS
                   inputs:
                     action: 'deploy'
+                    kubernetesServiceConnection: 'myaks'
                     namespace: 'default'
                     manifests: |
                       apiVersion: apps/v1
