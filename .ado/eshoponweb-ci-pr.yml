@@ -10,7 +10,9 @@ stages:
   jobs:
   - job: Build
     pool:
-      vmImage: ubuntu-latest
+      name: selfhostedpool
+      demands:
+      - agent.name -equals selfhostedvm
     steps:
     - task: DotNetCoreCLI@2
       displayName: Restore
