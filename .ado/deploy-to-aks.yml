@@ -21,7 +21,7 @@ stages:
         pool:
           name: selfhostedpool
           demands:
-          - agent.name -equals selfhostedvm
+          - agent.name -equals selfhostedubuntu
         steps:
           - task: Docker@2
             displayName: Pull redis image
