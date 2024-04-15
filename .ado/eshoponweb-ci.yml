@@ -2,6 +2,10 @@ resources:
   repositories:
     - repository: self
       trigger: none
+pool:
+  name: Default
+  demands:
+  - agent.name -equals selfhostedvm
 
 stages:
 - stage: Build
