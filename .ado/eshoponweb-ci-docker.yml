@@ -16,7 +16,7 @@ stages:
     pool:
       name: selfhostedpool
       demands:
-      - agent.name -equals selfhostedubuntu
+      - agent.name -equals shubuntu
     steps:
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: Deploy ACR using Bicep
@@ -64,7 +64,7 @@ stages:
     pool:
       name: selfhostedpool
       demands:
-      - agent.name -equals selfhostedubuntu
+      - agent.name -equals shubuntu
     steps:
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: Deploy App Service using Bicep
