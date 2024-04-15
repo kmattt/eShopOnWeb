@@ -40,7 +40,7 @@ stages:
               repository: '$(imageRepository)'
               command: 'build'
               Dockerfile: '**/Dockerfile'
-              buildContext: '**'
+              buildContext: 
               tags: |
                 $(tag)
                 latest
