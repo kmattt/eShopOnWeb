@@ -5,7 +5,7 @@ resources:
     - repository: self
       trigger: none
 
-pool: selfhostedvm1
+pool: Default
 
 stages:
 - stage: Build
