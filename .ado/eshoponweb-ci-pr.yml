@@ -20,6 +20,6 @@ stages:
         kubernetesServiceEndpoint: 'myaks'
         namespace: 'default'
         command: 'apply'
-        arguments: '--dry-run=client --validate -f $(System.DefaultWorkingDirectory)/testing.yml'
+        arguments: '--dry-run=server --validate -f $(System.DefaultWorkingDirectory)/testing.yml'
         secretType: 'dockerRegistry'
         containerRegistryType: 'Azure Container Registry'
