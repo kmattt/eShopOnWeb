@@ -5,7 +5,6 @@ variables:
   dockerRegistryServiceConnection: 'myACR'
   imageRepository: 'redis'
   containerRegistry: 'crry6vhgxwxv45m.azurecr.io'
-  tag: '$(Build.BuildId)'
   imagePullSecret: 'imagepullsecret'
 
 stages:
