@@ -17,6 +17,9 @@ stages:
       displayName: Validate K8s manifests
       inputs:
         connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'myaks'
         namespace: 'default'
         command: 'apply'
         arguments: '--dry-run --validate -f $(System.DefaultWorkingDirectory)'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
