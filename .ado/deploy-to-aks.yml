@@ -34,9 +34,7 @@ stages:
               command: 'build'
               dockerfilePath: 'Dockerfile'
               buildContext: '**'
-              tags: |
-                $(tag)
-                latest
+              tags: latest
 
           - task: Docker@2
             displayName: Push image to ACR
