@@ -11,7 +11,7 @@ stages:
     pool:
       name: selfhostedpool
       demands:
-      - agent.name -equals selfhostedvm
+      - agent.name -equals shubuntu
     steps:
     - task: Kubernetes@1
       displayName: Validate K8s manifests
