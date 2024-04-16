@@ -6,7 +6,6 @@ resources:
 variables:
   azureServiceConnection: 'MyAzureServiceConnection'
   subscriptionId: 'cc46f1e4-6a72-4158-b845-8dde05d89da2'
-  resourceGroup: 'rg-az400-container-Mateusz'
   location: 'westeurope'
 
 stages:
