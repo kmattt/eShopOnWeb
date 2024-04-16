@@ -42,9 +42,7 @@ stages:
               command: push
               repository: $(imageRepository)
               containerRegistry: $(dockerRegistryServiceConnection)
-              tags: |
-                $(tag)
-                latest
+              tags: latest
 
   - stage: Deploy
     displayName: Deploy to AKS
