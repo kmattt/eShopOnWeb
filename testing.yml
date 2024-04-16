@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: redis
-        image: crry6vhgxwxv45m/redis:latest
+        image: crry6vhgxwxv45m.azurecr.io/redis:latest
         ports:
         - containerPort: 6379
       imagePullSecrets:
