@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: redis
-        image: $(containerRegistry)/$(imageRepository):$(tag)
+        image: crry6vhgxwxv45m/redis:latest
         ports:
         - containerPort: 6379
       imagePullSecrets:
-      - name: $(imagePullSecret)
+      - name: magepullsecret
