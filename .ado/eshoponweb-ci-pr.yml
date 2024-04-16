@@ -1,41 +1,25 @@
-
 resources:
   repositories:
     - repository: self
       trigger: none
 
 stages:
-- stage: Build
-  displayName: Build .Net Core Solution
+- stage: PreCheck
+  displayName: Kubernetes Check
   jobs:
   - job: Build
     pool:
       name: selfhostedpool
       demands:
-      - agent.name -equals shubuntu
+      - agent.name -equals selfhostedvm
     steps:
-    - task: DotNetCoreCLI@2
-      displayName: Restore
+    - task: Kubernetes@1
+      displayName: Validate K8s manifests
       inputs:
-        command: 'restore'
-        projects: '**/*.sln'
-        feedsToUse: 'select'
-
-    - task: DotNetCoreCLI@2
-      displayName: Build
-      inputs:
-        command: 'build'
-        projects: '**/*.sln'
-    
-    - task: DotNetCoreCLI@2
-      displayName: Test
-      inputs:
-        command: 'test'
-        projects: 'tests/UnitTests/*.csproj'
-    
-    - task: DotNetCoreCLI@2
-      displayName: Publish
-      inputs:
-        command: 'publish'
-        publishWebProjects: true
-        arguments: '-o $(Build.ArtifactStagingDirectory)'
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'myaks'
+        namespace: 'default'
+        command: 'apply'
+        arguments: '--dry-run --validate -f $(System.DefaultWorkingDirectory)'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
