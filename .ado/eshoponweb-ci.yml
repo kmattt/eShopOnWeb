@@ -43,6 +43,8 @@ stages:
         projects: 'tests/UnitTests/*.csproj'
 
     - task: SonarCloudAnalyze@1
+      inputs:
+        jdkversion: 'JAVA_HOME_21_X64'
     
     - task: SonarCloudPublish@1
       inputs:
