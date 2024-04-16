@@ -1,8 +1,11 @@
-
 resources:
   repositories:
     - repository: self
       trigger: none
+pr:
+  branches:
+    include:
+    - main
 
 stages:
 - stage: Build
