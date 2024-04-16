@@ -14,12 +14,9 @@ stages:
       - agent.name -equals shubuntu
     steps:
     - task: Kubernetes@1
-      displayName: Validate K8s manifests
+      displayName: 'Validate testing.yml'
       inputs:
         connectionType: 'Kubernetes Service Connection'
-        kubernetesServiceEndpoint: 'myaks'
         namespace: 'default'
         command: 'apply'
-        arguments: '--dry-run --validate -f $(System.DefaultWorkingDirectory)'
-        secretType: 'dockerRegistry'
-        containerRegistryType: 'Azure Container Registry'
+        arguments: '--dry-run=client --validate -f $(System.DefaultWorkingDirectory)/testing.yml'
