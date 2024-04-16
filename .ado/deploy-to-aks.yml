@@ -46,6 +46,7 @@ stages:
 
   - stage: Deploy
     displayName: Deploy to AKS
+    dependsOn: Build
     jobs:
       - deployment: Deploy
         displayName: Deploy job
