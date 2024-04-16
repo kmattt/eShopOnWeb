@@ -5,7 +5,6 @@ resources:
 
 variables:
   azureServiceConnection: 'MyAzureServiceConnection'
-  subscriptionId: 'cc46f1e4-6a72-4158-b845-8dde05d89da2'
   location: 'westeurope'
 
 stages:
@@ -17,6 +16,14 @@ stages:
       demands:
       - agent.name -equals shubuntu
     steps:
+
+    - task: AzureKeyVault@2
+      inputs:
+        azureSubscription: 'MyAzureServiceConnection'
+        KeyVaultName: 'myvault1990'
+        SecretsFilter: '*'
+        RunAsPreJob: true
+
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: Deploy ACR using Bicep
       inputs:
@@ -30,6 +37,7 @@ stages:
         csmFile: 'infra/acr.bicep'
         deploymentMode: 'Incremental'
         deploymentOutputs: 'outputJson'
+
     - task: PowerShell@2
       displayName: Parse Bicep Output
       inputs:
@@ -38,6 +46,7 @@ stages:
           $var=ConvertFrom-Json '$(outputJson)'
           $value=$var.acrLoginServer.value
           Write-Host "##vso[task.setvariable variable=acrLoginServer;]$value"
+
     - task: Docker@0
       displayName: 'Build the docker image'
       inputs:
@@ -48,6 +57,7 @@ stages:
         context: $(Build.SourcesDirectory)
         includeLatestTag: true
         imageName: eshoponweb/web:$(Build.BuildId)
+
     - task: Docker@0
       displayName: 'Push the docker images'
       inputs:
@@ -65,6 +75,14 @@ stages:
       demands:
       - agent.name -equals shubuntu
     steps:
+
+    - task: AzureKeyVault@2
+      inputs:
+        azureSubscription: 'MyAzureServiceConnection'
+        KeyVaultName: 'myvault1990'
+        SecretsFilter: '*'
+        RunAsPreJob: true
+
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: Deploy App Service using Bicep
       inputs:
@@ -77,6 +95,7 @@ stages:
         templateLocation: 'Linked artifact'
         csmFile: 'infra/webapp-docker.bicep'
         deploymentMode: 'Incremental'
+
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: Add Role Assignment using Bicep
       inputs:
