@@ -8,11 +8,11 @@ variables:
   azureServiceConnection: 'MyAzureServiceConnection' # Service connection to Azure
   resourceGroup: 'myResourceGroup'                   # Resource group name
   location: 'eastus'                                 # Location for the resources
-  sqlServerName: 'mysqlserver213'                       # SQL Server name
-  sqlDatabaseName: 'mydatabase213'                      # SQL Database name
-  sqlAdminUser: 'sqladmin213'                           # SQL Admin username
+  sqlServerName: 'mySqlServer'                       # SQL Server name
+  sqlDatabaseName: 'myDatabase'                      # SQL Database name
+  sqlAdminUser: 'sqlAdmin'                           # SQL Admin username
   sqlAdminPassword: '12345Pass!'                     # SQL Admin password (stored securely)
-  firewallRuleName: MyFWRule
+  firewallRuleName: 'AllowMyIP'                      # Firewall rule name
 
 stages:
 - stage: InfrastructureSetup
@@ -40,6 +40,15 @@ stages:
         inlineScript: |
           # Create an Azure SQL Server
           az sql server create --name $(sqlServerName) --resource-group $(resourceGroup) --location $(location) --admin-user $(sqlAdminUser) --admin-password $(sqlAdminPassword)
+          
+    - script: |
+        # Fetch the current IP address
+        MY_IP=$(curl -s https://api.ipify.org)
+        echo "My IP is $MY_IP"
+        
+        # Add the IP address to the SQL Server firewall rules
+        az sql server firewall-rule create --resource-group $(resourceGroup) --server $(sqlServerName) --name $(firewallRuleName) --start-ip-address $MY_IP --end-ip-address $MY_IP
+      displayName: 'Add IP to SQL Server Firewall'
 
     - task: AzureCLI@2
       displayName: 'Create SQL Database'
@@ -58,19 +67,6 @@ stages:
   - job: MigrateDatabase
     displayName: 'Run Database Migrations'
     steps:
-    - task: AzureCLI@2
-      inputs:
-        azureSubscription: 'MyAzureServiceConnection'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          # Fetch the current IP address
-          MY_IP=$( curl -s http://ipinfo.io/json | jq '.ip')
-          echo "My IP is $MY_IP"
-          # Add the IP address to the SQL Server firewall rules
-          az sql server firewall-rule create --resource-group $(resourceGroup) --server $(sqlServerName) --name $(firewallRuleName) --start-ip-address $MY_IP/32 --end-ip-address $MY_IP/32
-      displayName: 'Add IP to SQL Server Firewall'
-
     - script: |
         wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/8.4.2/flyway-commandline-8.4.2-linux-x64.tar.gz | tar xvz
         sudo ln -s $(pwd)/flyway-8.4.2/flyway /usr/local/bin/flyway
@@ -108,19 +104,4 @@ stages:
       inputs:
         command: 'build'
         projects: '**/*.csproj'
-        arguments: '--configuration Release'
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish .NET Core Project'
-      inputs:
-        command: 'publish'
-        projects: '**/*.csproj'
-        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
-
-    - task: AzureWebApp@1
-      displayName: 'Deploy to Azure Web App'
-      inputs:
-        azureSubscription: $(azureServiceConnection)
-        appType: 'webApp'
-        appName: 'myAppService'
-        package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+   
