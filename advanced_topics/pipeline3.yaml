@@ -149,40 +149,9 @@ jobs:
         # flyway -url=jdbc:mysql://your-database-url -user=your-db-user -password=your-db-password migrate
       displayName: 'Execute Database Migration'
 
-- job: CanaryDeployment
-  displayName: 'Canary Deployment'
-  dependsOn: DeployWebsite3
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-    - script: echo "Starting canary deployment..."
-    - script: echo "Running tests and monitoring..."
-    - task: AzureWebApp@1
-      inputs:
-        azureSubscription: $(azureServiceConnection)
-        appName: $(appName)
-        slotName: $(canarySlotName)
-        package: '$(Pipeline.Workspace)/website3'
-      displayName: 'Deploy to Canary Slot and Monitor'
-
-- job: SwapSlots
-  displayName: 'Blue-Green Deployment Swap'
-  dependsOn: CanaryDeployment
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-    - task: AzureCLI@2
-      inputs:
-        azureSubscription: $(azureServiceConnection)
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az webapp deployment slot swap --resource-group $(resourceGroupName) --name $(appName) --slot $(blueSlotName) --target-slot $(greenSlotName)
-      displayName: 'Swap Blue and Green Slots'
-
 - job: MonitorAndAudit
   displayName: 'Monitoring and Auditing'
-  dependsOn: SwapSlots
+  dependsOn: MigrateDatabase
   pool:
     vmImage: 'ubuntu-latest'
   steps:
