@@ -7,7 +7,7 @@ pool:
 variables:
   azureServiceConnection: 'MyAzureServiceConnection' # Service connection to Azure
   resourceGroup: 'myResourceGroup'                   # Resource group name
-  location: 'East US'                                # Location for the resources
+  location: 'eastus'                                 # Location for the resources
   sqlServerName: 'mySqlServer'                       # SQL Server name
   sqlDatabaseName: 'myDatabase'                      # SQL Database name
   sqlAdminUser: 'sqlAdmin'                           # SQL Admin username
