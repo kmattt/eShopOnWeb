@@ -30,8 +30,13 @@ stages:
         version: '6.x'  # Specify the latest .NET 6 SDK version
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
 
-    - script: |
-        mkdir -p build  # Ensure the build directory exists
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          if (-not (Test-Path -Path build)) {
+            New-Item -ItemType Directory -Path build
+          }
       displayName: 'Create Build Directory'
 
     - task: Cache@2
@@ -43,10 +48,13 @@ stages:
           nuget | "$(Agent.OS)"
           nuget  # Fallback keys if the main key is not found
 
-    - script: |
-        if [ -z "$(PACKAGES_CACHE_RESTORED)" ]; then
-          dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
-        fi
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          if (-not $(PACKAGES_CACHE_RESTORED)) {
+            dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
+          }
       displayName: 'Restore Packages'
 
     - script: |
@@ -70,8 +78,13 @@ stages:
         version: '6.x'  # Specify the latest .NET 6 SDK version
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
 
-    - script: |
-        mkdir -p test  # Ensure the test directory exists
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          if (-not (Test-Path -Path test)) {
+            New-Item -ItemType Directory -Path test
+          }
       displayName: 'Create Test Directory'
 
     - task: Cache@2
@@ -83,16 +96,19 @@ stages:
           nuget | "$(Agent.OS)"
           nuget  # Fallback keys if the main key is not found
 
-    - script: |
-        if [ -z "$(PACKAGES_CACHE_RESTORED)" ]; then
-          dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
-        fi
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          if (-not $(PACKAGES_CACHE_RESTORED)) {
+            dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
+          }
       displayName: 'Restore Packages'
 
     - script: |
         dotnet test --no-restore --configuration Release --collect:"XPlat Code Coverage"  # Run tests and collect code coverage
       displayName: 'Run Tests'
-  
+
   - job: HighDemandJob
     displayName: 'High Demand Job'
     pool:
