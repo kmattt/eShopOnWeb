@@ -128,7 +128,7 @@ stages:
 
     - script: |
         echo "Running tests"
-        dotnet test "$(Pipeline.Workspace)\MyProject.csproj" --no-restore --configuration Release --collect:"XPlat Code Coverage"
+        dotnet test "$(System.ArtifactsDirectory)/MyProject/MyProject.csproj" --no-restore --configuration Release --collect:"XPlat Code Coverage"
       displayName: 'Run Tests'
 
 - stage: Troubleshoot
