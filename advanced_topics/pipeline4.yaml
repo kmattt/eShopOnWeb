@@ -58,6 +58,14 @@ stages:
     displayName: 'Run Database Migrations'
     steps:
     - script: |
+        # Fetch the current IP address
+        MY_IP=$(curl -s https://api.ipify.org)
+        echo "My IP is $MY_IP"
+        
+        # Add the IP address to the SQL Server firewall rules
+        az sql server firewall-rule create --resource-group $(resourceGroup) --server $(sqlServerName) --name $(firewallRuleName) --start-ip-address $MY_IP --end-ip-address $MY_IP
+      displayName: 'Add IP to SQL Server Firewall'
+    - script: |
         wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/8.4.2/flyway-commandline-8.4.2-linux-x64.tar.gz | tar xvz
         sudo ln -s $(pwd)/flyway-8.4.2/flyway /usr/local/bin/flyway
       displayName: 'Install Flyway CLI'
