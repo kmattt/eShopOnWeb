@@ -1,166 +1,166 @@
 trigger:
   branches:
     include:
-      - main
+      - main  # Trigger the pipeline on changes to the main branch
 
 variables:
-  azureServiceConnection: 'MyAzureServiceConnection'
-  resourceGroupName: 'RG-Deployments'
-  appName: 'WebApp-RG-Deployments'
-  appServicePlanName: 'ASP-RG-Deployments'
-  location: 'westeurope'
-  blueSlotName: 'blue'
-  greenSlotName: 'green'
-  canarySlotName: 'canary'
+  azureServiceConnection: 'MyAzureServiceConnection'  # Service connection for Azure
+  resourceGroupName: 'RG-Deployments'  # Resource group name
+  appName: 'WebApp-RG-Deployments'  # Name of the Azure Web App
+  appServicePlanName: 'ASP-RG-Deployments'  # Name of the App Service Plan
+  location: 'westeurope'  # Azure region for deployment
+  blueSlotName: 'blue'  # Deployment slot name: blue
+  greenSlotName: 'green'  # Deployment slot name: green
+  canarySlotName: 'canary'  # Deployment slot name: canary
 
 jobs:
 - job: CreateInfrastructure
-  displayName: 'Create Resource Group and Web App'
+  displayName: 'Create Resource Group and Web App'  # Display name for the infrastructure creation job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
     - task: AzureCLI@2
       inputs:
-        azureSubscription: $(azureServiceConnection)
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
+        azureSubscription: $(azureServiceConnection)  # Azure service connection
+        scriptType: 'bash'  # Script type: bash
+        scriptLocation: 'inlineScript'  # Script location: inline script
         inlineScript: |
           echo "Creating Resource Group..."
-          az group create --name $(resourceGroupName) --location $(location)
-          
+          az group create --name $(resourceGroupName) --location $(location)  # Create the resource group
+
           echo "Creating App Service Plan..."
-          az appservice plan create --name $(appServicePlanName) --resource-group $(resourceGroupName) --location $(location) --sku S1
+          az appservice plan create --name $(appServicePlanName) --resource-group $(resourceGroupName) --location $(location) --sku S1  # Create the App Service Plan
 
           echo "Creating Web App..."
-          az webapp create --name $(appName) --resource-group $(resourceGroupName) --plan $(appServicePlanName)
+          az webapp create --name $(appName) --resource-group $(resourceGroupName) --plan $(appServicePlanName)  # Create the Web App
 
           echo "Creating Deployment Slots..."
-          az webapp deployment slot create --name $(appName) --resource-group $(resourceGroupName) --slot $(blueSlotName)
-          az webapp deployment slot create --name $(appName) --resource-group $(resourceGroupName) --slot $(greenSlotName)
-          az webapp deployment slot create --name $(appName) --resource-group $(resourceGroupName) --slot $(canarySlotName)
-      displayName: 'Create RG, App Service Plan, Web App, and Slots'
+          az webapp deployment slot create --name $(appName) --resource-group $(resourceGroupName) --slot $(blueSlotName)  # Create the blue slot
+          az webapp deployment slot create --name $(appName) --resource-group $(resourceGroupName) --slot $(greenSlotName)  # Create the green slot
+          az webapp deployment slot create --name $(appName) --resource-group $(resourceGroupName) --slot $(canarySlotName)  # Create the canary slot
+      displayName: 'Create RG, App Service Plan, Web App, and Slots'  # Display name for the step
 
 - job: BuildWebsite1
-  displayName: 'Build Website 1'
-  dependsOn: CreateInfrastructure
+  displayName: 'Build Website 1'  # Display name for the build website 1 job
+  dependsOn: CreateInfrastructure  # This job depends on the infrastructure creation job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: 'website1'
-        artifactName: 'website1-drop'
-      displayName: 'Publish Website 1 Artifact'
+        targetPath: 'website1'  # Path to the website 1 source code
+        artifactName: 'website1-drop'  # Name of the artifact
+      displayName: 'Publish Website 1 Artifact'  # Display name for the step
 
 - job: BuildWebsite2
-  displayName: 'Build Website 2'
-  dependsOn: CreateInfrastructure
+  displayName: 'Build Website 2'  # Display name for the build website 2 job
+  dependsOn: CreateInfrastructure  # This job depends on the infrastructure creation job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: 'website2'
-        artifactName: 'website2-drop'
-      displayName: 'Publish Website 2 Artifact'
+        targetPath: 'website2'  # Path to the website 2 source code
+        artifactName: 'website2-drop'  # Name of the artifact
+      displayName: 'Publish Website 2 Artifact'  # Display name for the step
 
 - job: BuildWebsite3
-  displayName: 'Build Website 3'
-  dependsOn: CreateInfrastructure
+  displayName: 'Build Website 3'  # Display name for the build website 3 job
+  dependsOn: CreateInfrastructure  # This job depends on the infrastructure creation job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: 'website3'
-        artifactName: 'website3-drop'
-      displayName: 'Publish Website 3 Artifact'
+        targetPath: 'website3'  # Path to the website 3 source code
+        artifactName: 'website3-drop'  # Name of the artifact
+      displayName: 'Publish Website 3 Artifact'  # Display name for the step
 
 - job: DeployWebsite1
-  displayName: 'Deploy Website 1 to Blue Slot'
-  dependsOn: BuildWebsite1
+  displayName: 'Deploy Website 1 to Blue Slot'  # Display name for the deploy website 1 job
+  dependsOn: BuildWebsite1  # This job depends on the build website 1 job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        buildType: 'current'
-        artifactName: 'website1-drop'
-        targetPath: '$(Pipeline.Workspace)/website1'
+        buildType: 'current'  # Download artifacts from the current build
+        artifactName: 'website1-drop'  # Name of the artifact to download
+        targetPath: '$(Pipeline.Workspace)/website1'  # Path to download the artifact to
 
     - task: AzureWebApp@1
       inputs:
-        azureSubscription: $(azureServiceConnection)
-        appName: $(appName)
-        package: '$(Pipeline.Workspace)/website1'
-        slotName: $(blueSlotName)
+        azureSubscription: $(azureServiceConnection)  # Azure service connection
+        appName: $(appName)  # Name of the Web App
+        package: '$(Pipeline.Workspace)/website1'  # Path to the package to deploy
+        slotName: $(blueSlotName)  # Deploy to the blue slot
 
 - job: DeployWebsite2
-  displayName: 'Deploy Website 2 to Green Slot'
-  dependsOn: BuildWebsite2
+  displayName: 'Deploy Website 2 to Green Slot'  # Display name for the deploy website 2 job
+  dependsOn: BuildWebsite2  # This job depends on the build website 2 job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        buildType: 'current'
-        artifactName: 'website2-drop'
-        targetPath: '$(Pipeline.Workspace)/website2'
+        buildType: 'current'  # Download artifacts from the current build
+        artifactName: 'website2-drop'  # Name of the artifact to download
+        targetPath: '$(Pipeline.Workspace)/website2'  # Path to download the artifact to
 
     - task: AzureWebApp@1
       inputs:
-        azureSubscription: $(azureServiceConnection)
-        appName: $(appName)
-        package: '$(Pipeline.Workspace)/website2'
-        slotName: $(greenSlotName)
+        azureSubscription: $(azureServiceConnection)  # Azure service connection
+        appName: $(appName)  # Name of the Web App
+        package: '$(Pipeline.Workspace)/website2'  # Path to the package to deploy
+        slotName: $(greenSlotName)  # Deploy to the green slot
 
 - job: DeployWebsite3
-  displayName: 'Deploy Website 3 to Canary Slot'
-  dependsOn: BuildWebsite3
+  displayName: 'Deploy Website 3 to Canary Slot'  # Display name for the deploy website 3 job
+  dependsOn: BuildWebsite3  # This job depends on the build website 3 job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        buildType: 'current'
-        artifactName: 'website3-drop'
-        targetPath: '$(Pipeline.Workspace)/website3'
+        buildType: 'current'  # Download artifacts from the current build
+        artifactName: 'website3-drop'  # Name of the artifact to download
+        targetPath: '$(Pipeline.Workspace)/website3'  # Path to download the artifact to
 
     - task: AzureWebApp@1
       inputs:
-        azureSubscription: $(azureServiceConnection)
-        appName: $(appName)
-        package: '$(Pipeline.Workspace)/website3'
-        slotName: $(canarySlotName)
+        azureSubscription: $(azureServiceConnection)  # Azure service connection
+        appName: $(appName)  # Name of the Web App
+        package: '$(Pipeline.Workspace)/website3'  # Path to the package to deploy
+        slotName: $(canarySlotName)  # Deploy to the canary slot
 
 - job: MigrateDatabase
-  displayName: 'Database Schema Migration'
+  displayName: 'Database Schema Migration'  # Display name for the database migration job
   dependsOn:
-    - DeployWebsite1
-    - DeployWebsite2
-    - DeployWebsite3
+    - DeployWebsite1  # This job depends on the deploy website 1 job
+    - DeployWebsite2  # This job depends on the deploy website 2 job
+    - DeployWebsite3  # This job depends on the deploy website 3 job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
     - script: |
         echo "Running database schema migration..."
         # Add your database migration scripts here
         # Example: flyway migrate or custom scripts
         # flyway -url=jdbc:mysql://your-database-url -user=your-db-user -password=your-db-password migrate
-      displayName: 'Execute Database Migration'
+      displayName: 'Execute Database Migration'  # Execute database migration scripts
 
 - job: MonitorAndAudit
-  displayName: 'Monitoring and Auditing'
-  dependsOn: MigrateDatabase
+  displayName: 'Monitoring and Auditing'  # Display name for the monitoring and auditing job
+  dependsOn: MigrateDatabase  # This job depends on the database migration job
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
   steps:
-    - script: echo "Setting up monitoring..."
+    - script: echo "Setting up monitoring..."  # Echo setting up monitoring
     - script: |
         # Add your monitoring setup scripts here
         echo "Monitoring setup complete."
-    - script: echo "Starting auditing..."
+    - script: echo "Starting auditing..."  # Echo starting auditing
     - script: |
         # Add your auditing scripts here
         echo "Auditing complete."
-      displayName: 'Setup Monitoring and Auditing'
+      displayName: 'Setup Monitoring and Auditing'  # Setup monitoring and auditing scripts
