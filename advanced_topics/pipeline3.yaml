@@ -90,10 +90,11 @@ jobs:
 
     - task: AzureWebApp@1
       inputs:
-        azureSubscription: $(azureServiceConnection)  # Azure service connection
-        appName: $(appName)  # Name of the Web App
-        package: '$(Pipeline.Workspace)/website1'  # Path to the package to deploy
-        slotName: $(blueSlotName)  # Deploy to the blue slot
+        azureSubscription: '$(azureServiceConnection)'
+        appType: 'webApp'
+        appName: '$(appName)'
+        package: '$(Pipeline.Workspace)/website1'
+        deploymentMethod: 'auto'
 
 - job: DeployWebsite2
   displayName: 'Deploy Website 2 to Green Slot'  # Display name for the deploy website 2 job
@@ -109,10 +110,11 @@ jobs:
 
     - task: AzureWebApp@1
       inputs:
-        azureSubscription: $(azureServiceConnection)  # Azure service connection
-        appName: $(appName)  # Name of the Web App
-        package: '$(Pipeline.Workspace)/website2'  # Path to the package to deploy
-        slotName: $(greenSlotName)  # Deploy to the green slot
+        azureSubscription: '$(azureServiceConnection)'
+        appType: 'webApp'
+        appName: '$(appName)'
+        package: '$(Pipeline.Workspace)/website2'
+        deploymentMethod: 'auto'
 
 - job: DeployWebsite3
   displayName: 'Deploy Website 3 to Canary Slot'  # Display name for the deploy website 3 job
@@ -128,10 +130,11 @@ jobs:
 
     - task: AzureWebApp@1
       inputs:
-        azureSubscription: $(azureServiceConnection)  # Azure service connection
-        appName: $(appName)  # Name of the Web App
-        package: '$(Pipeline.Workspace)/website3'  # Path to the package to deploy
-        slotName: $(canarySlotName)  # Deploy to the canary slot
+        azureSubscription: '$(azureServiceConnection)'
+        appType: 'webApp'
+        appName: '$(appName)'
+        package: '$(Pipeline.Workspace)/website3'
+        deploymentMethod: 'auto'
 
 - job: MonitorAndAudit
   displayName: 'Monitoring and Auditing'  # Display name for the monitoring and auditing job
