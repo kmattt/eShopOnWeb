@@ -42,6 +42,11 @@ stages:
     - script: |
         echo "##vso[task.setvariable variable=BuildConfiguration]Release"
       displayName: 'Set Build Configuration Variable'
+    
+    - script: |
+        mkdir -p $(Build.ArtifactStagingDirectory)
+        cp -r */bin/Release/* $(Build.ArtifactStagingDirectory)
+      displayName: 'Copy Build Output to Staging Directory'
   
     - task: ArchiveFiles@2
       inputs:
