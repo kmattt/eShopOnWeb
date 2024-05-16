@@ -94,7 +94,6 @@ stages:
                 # Create the function app if it doesn't exist
                 az functionapp create --resource-group $(resourceGroup) --consumption-plan-location $(location) --runtime dotnet --functions-version 3 --name $(functionAppName) --storage-account $(storageAccountName)
             displayName: 'Create Azure Function App'
-            condition: eq(variables['BuildConfiguration'], 'Release')
 
 - stage: ManualApproval
   displayName: 'Manual Approval Stage'
