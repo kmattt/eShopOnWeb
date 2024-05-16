@@ -73,11 +73,6 @@ stages:
       env:
         DATABASE_URL: "mysql+pymysql://$(sqlAdminUser):$(sqlAdminPassword)@$(sqlServerName).database.windows.net/$(sqlDatabaseName)"
 
-    - script: |
-        # Run Alembic migrations to update the database schema
-        alembic upgrade head
-      displayName: 'Run Migrations'
-
 - stage: DeployApp
   displayName: 'Deploy Application'
   dependsOn: DatabaseMigrations
