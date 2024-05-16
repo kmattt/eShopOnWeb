@@ -1,0 +1,107 @@
+trigger:
+- main  # Trigger the pipeline on changes to the main branch
+
+pool:
+  vmImage: 'windows-latest'  # Use Microsoft-hosted agents with the latest Windows image
+
+variables:
+  # Cache key and paths
+  NUGET_PACKAGES: '$(Pipeline.Workspace)/.nuget/packages'  # Define the path for NuGet packages cache
+
+stages:
+- stage: BuildAndTest
+  jobs:
+  - job: Build
+    displayName: 'Build Job'
+    pool:
+      vmImage: 'windows-latest'  # Use Microsoft-hosted agent
+    workspace:
+      clean: all  # Clean the workspace before starting the job
+    steps:
+    - checkout: self
+      fetchDepth: 1  # Fetch only the latest commit to reduce checkout time
+      persistCredentials: true  # Persist credentials for any future fetches
+      lfs: false  # Do not fetch Git LFS objects
+      submodules: false  # Do not fetch submodules
+
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '6.x.x'  # Specify the .NET SDK version to use
+        installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
+
+    - task: Cache@2
+      inputs:
+        key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'  # Cache key
+        path: $(NUGET_PACKAGES)  # Path to store cached packages
+        restoreKeys: |
+          nuget | "$(Agent.OS)"
+          nuget  # Fallback keys if the main key is not found
+
+    - script: |
+        dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages
+      displayName: 'Restore Packages'
+
+    - script: |
+        dotnet build --no-restore --configuration Release  # Build the project
+      displayName: 'Build Project'
+
+  - job: Test
+    displayName: 'Test Job'
+    dependsOn: Build  # This job depends on the Build job
+    pool:
+      vmImage: 'windows-latest'  # Use Microsoft-hosted agent
+    workspace:
+      clean: all  # Clean the workspace before starting the job
+    steps:
+    - checkout: self
+      fetchDepth: 1  # Fetch only the latest commit
+
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '6.x.x'  # Specify the .NET SDK version to use
+        installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
+
+    - task: Cache@2
+      inputs:
+        key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'  # Cache key
+        path: $(NUGET_PACKAGES)  # Path to store cached packages
+        restoreKeys: |
+          nuget | "$(Agent.OS)"
+          nuget  # Fallback keys if the main key is not found
+
+    - script: |
+        dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages
+      displayName: 'Restore Packages'
+
+    - script: |
+        dotnet test --no-restore --configuration Release --collect:"XPlat Code Coverage"  # Run tests and collect code coverage
+      displayName: 'Run Tests'
+  
+  - job: HighDemandJob
+    displayName: 'High Demand Job'
+    pool:
+      vmImage: 'windows-latest'  # Use Microsoft-hosted agent with latest Windows image
+    workspace:
+      clean: all  # Clean the workspace before starting the job
+    steps:
+    - checkout: self
+      fetchDepth: 1  # Fetch only the latest commit
+
+    - script: |
+        echo "Running high-demand job tasks here..."  # Placeholder for high-demand job tasks
+      displayName: 'High Demand Task'
+
+- stage: Troubleshoot
+  condition: failed()  # Run this stage only if the pipeline fails
+  jobs:
+  - job: Troubleshoot
+    displayName: 'Troubleshooting Job'
+    pool:
+      vmImage: 'windows-latest'  # Use Microsoft-hosted agent
+    steps:
+    - script: |
+        echo "Gathering logs and troubleshooting information..."  # Gather logs and troubleshooting info
+        # Custom troubleshooting commands go here
+      displayName: 'Troubleshoot Steps'
