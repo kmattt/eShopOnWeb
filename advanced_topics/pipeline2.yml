@@ -24,8 +24,12 @@ stages:
         installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - script: |
-        dotnet build --configuration Release
-      displayName: 'Build Project'
+        for d in */ ; do
+          if [ -f "$d/project.json" ]; then
+            dotnet build "$d" --configuration Release
+          fi
+        done
+      displayName: 'Build Projects'
 
     - script: |
         echo "##vso[task.setvariable variable=BuildConfiguration]Release"
@@ -49,9 +53,11 @@ stages:
             
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: $(azureServiceConnection)
-              appName: $(appServiceName)
-              package: $(Build.ArtifactStagingDirectory)/*.zip
+              azureSubscription: '$(azureServiceConnection)'
+              appType: 'webApp'
+              appName: '$(appServiceName)'
+              package: '$(Build.ArtifactStagingDirectory)/*.zip'
+              deploymentMethod: 'auto'
             displayName: 'Azure Web App Deploy'
             condition: eq(variables['BuildConfiguration'], 'Release')
 
@@ -65,9 +71,21 @@ stages:
             displayName: 'Check Storage Account'
             condition: eq(variables['BuildConfiguration'], 'Release')
 
+- stage: ManualApproval
+  displayName: 'Manual Approval Stage'
+  dependsOn: Deploy
+  jobs:
+  - job: ApprovalJob
+    displayName: 'Manual Approval Job'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: echo "Manual approval required."
+      displayName: 'Manual Approval Script'
+
 - stage: PostApproval
   displayName: 'Post Approval Stage'
-  dependsOn: Deploy
+  dependsOn: ManualApproval
   condition: succeeded()
   jobs:
   - job: PostApprovalJob
@@ -82,6 +100,6 @@ stages:
       inputs:
         azureSubscription: $(azureServiceConnection)
         appType: 'functionApp'
-        appName: 'your-function-app-name'
+        appName: 'FuncAppRG2a'
         package: $(Build.ArtifactStagingDirectory)/*.zip
       displayName: 'Deploy to Azure Function App'
