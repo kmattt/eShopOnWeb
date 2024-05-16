@@ -8,7 +8,7 @@ variables:
   storageAccountName: 'StorageAccountRG2a'
   environmentName: 'production'
   functionAppName: 'FuncAppRG2a'
-  location: 'westeurope'  # e.g., 'eastus'
+  location: 'westeurope'
 
 stages:
 - stage: Build
@@ -61,9 +61,11 @@ stages:
             
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: $(azureServiceConnection)
-              appName: $(appServiceName)
-              package: $(Build.ArtifactStagingDirectory)/*.zip
+              azureSubscription: '$(azureServiceConnection)'
+              appType: 'webApp'
+              appName: '$(appServiceName)'
+              package: '$(Build.ArtifactStagingDirectory)/*.zip'
+              deploymentMethod: 'auto'
             displayName: 'Azure Web App Deploy'
             condition: eq(variables['BuildConfiguration'], 'Release')
 
