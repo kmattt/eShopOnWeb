@@ -9,10 +9,10 @@ variables:
   NUGET_PACKAGES: '$(Pipeline.Workspace)/.nuget/packages'  # Define the path for NuGet packages cache
 
 stages:
-- stage: BuildAndTest
+- stage: SetupAndBuild
   jobs:
-  - job: Build
-    displayName: 'Build Job'
+  - job: SetupAndBuild
+    displayName: 'Setup and Build Job'
     pool:
       vmImage: 'windows-latest'  # Use Microsoft-hosted agent
     workspace:
@@ -29,6 +29,16 @@ stages:
         packageType: 'sdk'
         version: '6.x'  # Specify the latest .NET 6 SDK version
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
+
+    - script: |
+        echo "Creating a new .NET console application project"
+        dotnet new console -n MyProject
+      displayName: 'Create .NET Project'
+
+    - script: |
+        echo "Listing files in the current directory"
+        dir
+      displayName: 'List Files in Current Directory'
 
     - task: PowerShell@2
       inputs:
@@ -57,12 +67,16 @@ stages:
           }
       displayName: 'Restore Packages'
 
-    - script: dotnet build MySolution.sln --no-restore --configuration Release
+    - script: |
+        echo "Building the project"
+        dotnet build MyProject/MyProject.csproj --no-restore --configuration Release
       displayName: 'Build Project'
 
+- stage: Test
+  dependsOn: SetupAndBuild
+  jobs:
   - job: Test
     displayName: 'Test Job'
-    dependsOn: Build  # This job depends on the Build job
     pool:
       vmImage: 'windows-latest'  # Use Microsoft-hosted agent
     workspace:
@@ -104,21 +118,10 @@ stages:
           }
       displayName: 'Restore Packages'
 
-    - script: dotnet test MySolution.sln --no-restore --configuration Release --collect:"XPlat Code Coverage"
+    - script: |
+        echo "Running tests"
+        dotnet test MyProject/MyProject.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage"
       displayName: 'Run Tests'
-
-  - job: HighDemandJob
-    displayName: 'High Demand Job'
-    pool:
-      vmImage: 'windows-latest'  # Use Microsoft-hosted agent with latest Windows image
-    workspace:
-      clean: all  # Clean the workspace before starting the job
-    steps:
-    - checkout: self
-      fetchDepth: 1  # Fetch only the latest commit
-
-    - script: echo "Running high-demand job tasks here..."
-      displayName: 'High Demand Task'
 
 - stage: Troubleshoot
   condition: failed()  # Run this stage only if the pipeline fails
