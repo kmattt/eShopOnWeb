@@ -57,21 +57,18 @@ stages:
   - job: MigrateDatabase
     displayName: 'Run Database Migrations'
     steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '3.x'
-        addToPath: true
+    - script: |
+        wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/8.4.2/flyway-commandline-8.4.2-linux-x64.tar.gz | tar xvz
+        sudo ln -s `pwd`/flyway-8.4.2/flyway /usr/local/bin
+      displayName: 'Install Flyway CLI'
 
     - script: |
-        python -m pip install --upgrade pip
-        pip install alembic pymysql
-      displayName: 'Install Alembic and PyMySQL'
-
-    - script: |
-        alembic upgrade head
-      displayName: 'Run Migrations'
+        flyway -url=jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName) -user=$(sqlAdminUser) -password=$(sqlAdminPassword) -locations=filesystem:sql migrate
+      displayName: 'Run Flyway Migrations'
       env:
-        DATABASE_URL: "mysql+pymysql://$(sqlAdminUser):$(sqlAdminPassword)@$(sqlServerName).database.windows.net/$(sqlDatabaseName)"
+        FLYWAY_URL: "jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName)"
+        FLYWAY_USER: "$(sqlAdminUser)"
+        FLYWAY_PASSWORD: "$(sqlAdminPassword)"
 
 - stage: DeployApp
   displayName: 'Deploy Application'
