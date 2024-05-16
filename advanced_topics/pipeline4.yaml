@@ -59,7 +59,7 @@ stages:
     steps:
     - script: |
         # Fetch the current IP address
-        MY_IP=$(curl -s https://api.ipify.org)
+        MY_IP=$( curl -s http://ipinfo.io/json | jq '.ip')
         echo "My IP is $MY_IP"
         
         # Add the IP address to the SQL Server firewall rules
