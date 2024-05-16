@@ -88,7 +88,7 @@ stages:
 
     - task: Cache@2
       inputs:
-        key: 'nuget | "$(Agent.OS)" | $(Build.SourcesDirectory)/nuget.config'
+        key: 'nuget | "$(Agent.OS)" | $(Build.SourcesDirectory)/build/nuget.config'
         path: $(NUGET_PACKAGES)  # Path to store cached packages
         cacheHitVar: 'PACKAGES_CACHE_RESTORED'  # Variable to check if the cache was restored
         restoreKeys: |
