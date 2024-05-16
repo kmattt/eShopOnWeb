@@ -59,12 +59,16 @@ stages:
     steps:
     - script: |
         wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/8.4.2/flyway-commandline-8.4.2-linux-x64.tar.gz | tar xvz
-        sudo ln -s `pwd`/flyway-8.4.2/flyway /usr/local/bin
+        sudo ln -s $(pwd)/flyway-8.4.2/flyway /usr/local/bin/flyway
       displayName: 'Install Flyway CLI'
 
     - script: |
-        flyway -url=jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName) -user=$(sqlAdminUser) -password=$(sqlAdminPassword) -locations=filesystem:sql migrate
+        /usr/local/bin/flyway -url=jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName) -user=$(sqlAdminUser) -password=$(sqlAdminPassword) -locations=filesystem:sql migrate
       displayName: 'Run Flyway Migrations'
+      env:
+        FLYWAY_URL: "jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName)"
+        FLYWAY_USER: "$(sqlAdminUser)"
+        FLYWAY_PASSWORD: "$(sqlAdminPassword)"
 
 - stage: DeployApp
   displayName: 'Deploy Application'
