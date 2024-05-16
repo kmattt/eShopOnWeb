@@ -69,10 +69,10 @@ stages:
       displayName: 'Install Alembic'
 
     - script: |
-        # Copy alembic.ini to the current working directory and set the connection string
-        cp ./alembic.ini ./
-        sed -i 's/^sqlalchemy.url = .*/sqlalchemy.url = mysql+pymysql:\/\/$(sqlAdminUser):$(sqlAdminPassword)@$(sqlServerName).database.windows.net\/$(sqlDatabaseName)/' alembic.ini
-      displayName: 'Set Alembic Config'
+        alembic upgrade head
+      displayName: 'Run Migrations'
+      env:
+        DATABASE_URL: "mysql+pymysql://$(sqlAdminUser):$(sqlAdminPassword)@$(sqlServerName).database.windows.net/$(sqlDatabaseName)"
 
     - script: |
         python -m pip install --upgrade pip
