@@ -41,7 +41,7 @@ stages:
 
     - task: Cache@2
       inputs:
-        key: 'nuget | "$(Agent.OS)" | build/nuget.config'
+        key: 'nuget | "$(Agent.OS)" | $(Build.SourcesDirectory)/nuget.config'
         path: $(NUGET_PACKAGES)  # Path to store cached packages
         cacheHitVar: 'PACKAGES_CACHE_RESTORED'  # Variable to check if the cache was restored
         restoreKeys: |
@@ -52,7 +52,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          if (-not $(PACKAGES_CACHE_RESTORED)) {
+          if (-not $env:PACKAGES_CACHE_RESTORED) {
             dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
           }
       displayName: 'Restore Packages'
@@ -89,7 +89,7 @@ stages:
 
     - task: Cache@2
       inputs:
-        key: 'nuget | "$(Agent.OS)" | test/nuget.config'
+        key: 'nuget | "$(Agent.OS)" | $(Build.SourcesDirectory)/nuget.config'
         path: $(NUGET_PACKAGES)  # Path to store cached packages
         cacheHitVar: 'PACKAGES_CACHE_RESTORED'  # Variable to check if the cache was restored
         restoreKeys: |
@@ -100,7 +100,7 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          if (-not $(PACKAGES_CACHE_RESTORED)) {
+          if (-not $env:PACKAGES_CACHE_RESTORED) {
             dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
           }
       displayName: 'Restore Packages'
