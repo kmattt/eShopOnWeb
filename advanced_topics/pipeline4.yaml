@@ -63,12 +63,12 @@ stages:
       displayName: 'Install Flyway CLI'
 
     - script: |
-        flyway -url=jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName) -user=$(sqlAdminUser) -password=$(sqlAdminPassword) -locations=filesystem:sql migrate
+        flyway -url=jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName) \
+               -user=$(sqlAdminUser) \
+               -password=$(sqlAdminPassword) \
+               -locations=filesystem:sql \
+               migrate
       displayName: 'Run Flyway Migrations'
-      env:
-        FLYWAY_URL: "jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName)"
-        FLYWAY_USER: "$(sqlAdminUser)"
-        FLYWAY_PASSWORD: "$(sqlAdminPassword)"
 
 - stage: DeployApp
   displayName: 'Deploy Application'
