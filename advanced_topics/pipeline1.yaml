@@ -40,11 +40,6 @@ stages:
         dir
       displayName: 'List Files in Current Directory'
 
-    - script: |
-        echo "Listing files in the MyProject directory"
-        dir MyProject
-      displayName: 'List Files in MyProject Directory'
-
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -77,6 +72,10 @@ stages:
         dotnet build MyProject/MyProject.csproj --no-restore --configuration Release
       displayName: 'Build Project'
 
+    - publish: MyProject
+      artifact: MyProjectArtifact
+      displayName: 'Publish Project Artifact'
+
 - stage: Test
   dependsOn: SetupAndBuild
   jobs:
@@ -87,8 +86,9 @@ stages:
     workspace:
       clean: all  # Clean the workspace before starting the job
     steps:
-    - checkout: self
-      fetchDepth: 1  # Fetch only the latest commit
+    - download: current
+      artifact: MyProjectArtifact
+      displayName: 'Download Project Artifact'
 
     - task: UseDotNet@2
       inputs:
@@ -97,14 +97,9 @@ stages:
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
 
     - script: |
-        echo "Listing files in the sources directory"
-        dir $(Build.SourcesDirectory)
-      displayName: 'List Files in Sources Directory'
-
-    - script: |
-        echo "Listing files in the MyProject directory"
-        dir $(Build.SourcesDirectory)/MyProject
-      displayName: 'List Files in MyProject Directory'
+        echo "Listing files in the current directory"
+        dir
+      displayName: 'List Files in Current Directory'
 
     - task: PowerShell@2
       inputs:
@@ -135,7 +130,7 @@ stages:
 
     - script: |
         echo "Running tests"
-        dotnet test $(Build.SourcesDirectory)/MyProject/MyProject.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage"
+        dotnet test MyProject/MyProject.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage"
       displayName: 'Run Tests'
 
 - stage: Troubleshoot
