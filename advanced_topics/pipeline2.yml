@@ -164,5 +164,5 @@ stages:
         azureSubscription: $(azureServiceConnection)
         appType: 'functionApp'
         appName: $(functionAppName)
-        package: $(Build.ArtifactStagingDirectory)/*.zip
+        package: $(Build.ArtifactStagingDirectory)/drop/*.zip
       displayName: 'Deploy to Azure Function App'
