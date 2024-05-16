@@ -144,5 +144,5 @@ stages:
       inputs:
         azureSubscription: $(azureServiceConnection)
         appType: 'webApp'
-        appName: 'myAppService'
+        appName: '$(appServiceName)'
         package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
