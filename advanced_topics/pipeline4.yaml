@@ -63,21 +63,15 @@ stages:
         addToPath: true
 
     - script: |
-        # Upgrade pip and install Alembic for database migrations
         python -m pip install --upgrade pip
-        pip install alembic
-      displayName: 'Install Alembic'
+        pip install alembic pymysql
+      displayName: 'Install Alembic and PyMySQL'
 
     - script: |
         alembic upgrade head
       displayName: 'Run Migrations'
       env:
         DATABASE_URL: "mysql+pymysql://$(sqlAdminUser):$(sqlAdminPassword)@$(sqlServerName).database.windows.net/$(sqlDatabaseName)"
-
-    - script: |
-        python -m pip install --upgrade pip
-        pip install alembic pymysql
-      displayName: 'Install Alembic and PyMySQL'
 
     - script: |
         # Run Alembic migrations to update the database schema
