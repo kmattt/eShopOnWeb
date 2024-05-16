@@ -8,10 +8,12 @@ variables:
   azureServiceConnection: 'MyAzureServiceConnection' # Service connection to Azure
   resourceGroup: 'myResourceGroup'                   # Resource group name
   location: 'eastus'                                 # Location for the resources
-  sqlServerName: 'mysqlserver213'                       # SQL Server name
-  sqlDatabaseName: 'mydatabase213'                      # SQL Database name
-  sqlAdminUser: 'sqladmin213'                           # SQL Admin username
+  sqlServerName: 'mysqlserver213'                    # SQL Server name
+  sqlDatabaseName: 'mydatabase213'                   # SQL Database name
+  sqlAdminUser: 'sqladmin213'                        # SQL Admin username
   sqlAdminPassword: '12345Pass!'                     # SQL Admin password (stored securely)
+  appServicePlan: 'asp-213a'                         # App Service Plan name
+  appServiceName: 'app-service-213a'                 # App Service name
   firewallRuleName: MyFWRule
 
 stages:
@@ -116,6 +118,26 @@ stages:
         command: 'publish'
         projects: '**/*.csproj'
         arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
+
+    - task: AzureCLI@2
+      displayName: 'Create App Service Plan'
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          # Create an App Service Plan
+          az appservice plan create --name $(appServicePlan) --resource-group $(resourceGroup) --location $(location) --sku B1
+  
+    - task: AzureCLI@2
+      displayName: 'Create App Service'
+      inputs:
+        azureSubscription: $(azureServiceConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          # Create an App Service
+          az webapp create --name $(appServiceName) --plan $(appServicePlan) --resource-group $(resourceGroup)
 
     - task: AzureWebApp@1
       displayName: 'Deploy to Azure Web App'
