@@ -92,7 +92,7 @@ stages:
                 az storage account create --name $(storageAccountName) --location $(location) --resource-group $(resourceGroup) --sku Standard_LRS
 
                 # Create the function app if it doesn't exist
-                az functionapp create --resource-group $(resourceGroup) --consumption-plan-location $(location) --runtime dotnet --functions-version 3 --name $(functionAppName) --storage-account $(storageAccountName)
+                az functionapp create --resource-group $(resourceGroup) --consumption-plan-location $(location) --runtime dotnet --functions-version 4 --name $(functionAppName) --storage-account $(storageAccountName)
             displayName: 'Create Azure Function App'
 
 - stage: ManualApproval
