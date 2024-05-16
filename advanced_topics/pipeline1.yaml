@@ -58,11 +58,13 @@ stages:
           nuget | "$(Agent.OS)"
           nuget  # Fallback keys if the main key is not found
 
-    - script: |
-        echo "Restore packages if cache not restored"
-        if (-not $env:PACKAGES_CACHE_RESTORED) {
-          dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)
-        }
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          if (-not $env:PACKAGES_CACHE_RESTORED) {
+            dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
+          }
       displayName: 'Restore Packages'
 
     - script: |
@@ -107,11 +109,13 @@ stages:
           nuget | "$(Agent.OS)"
           nuget  # Fallback keys if the main key is not found
 
-    - script: |
-        echo "Restore packages if cache not restored"
-        if (-not $env:PACKAGES_CACHE_RESTORED) {
-          dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)
-        }
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          if (-not $env:PACKAGES_CACHE_RESTORED) {
+            dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
+          }
       displayName: 'Restore Packages'
 
     - script: |
