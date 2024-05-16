@@ -7,6 +7,8 @@ variables:
   appServiceName: 'WebAppRG2a'
   storageAccountName: 'StorageAccountRG2a'
   environmentName: 'production'
+  functionAppName: 'FuncAppRG2a'
+  location: 'westeurope'  # e.g., 'eastus'
 
 stages:
 - stage: Build
@@ -75,6 +77,23 @@ stages:
             displayName: 'Check Storage Account'
             condition: eq(variables['BuildConfiguration'], 'Release')
 
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: $(azureServiceConnection)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Create the resource group if it doesn't exist
+                az group create --name $(resourceGroup) --location $(location)
+
+                # Create the storage account if it doesn't exist
+                az storage account create --name $(storageAccountName) --location $(location) --resource-group $(resourceGroup) --sku Standard_LRS
+
+                # Create the function app if it doesn't exist
+                az functionapp create --resource-group $(resourceGroup) --consumption-plan-location $(location) --runtime dotnet --functions-version 3 --name $(functionAppName) --storage-account $(storageAccountName)
+            displayName: 'Create Azure Function App'
+            condition: eq(variables['BuildConfiguration'], 'Release')
+
 - stage: ManualApproval
   displayName: 'Manual Approval Stage'
   dependsOn: Deploy
@@ -104,6 +123,6 @@ stages:
       inputs:
         azureSubscription: $(azureServiceConnection)
         appType: 'functionApp'
-        appName: 'FuncAppRG2a'
+        appName: $(functionAppName)
         package: $(Build.ArtifactStagingDirectory)/*.zip
       displayName: 'Deploy to Azure Function App'
