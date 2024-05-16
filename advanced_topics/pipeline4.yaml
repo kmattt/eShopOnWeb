@@ -11,7 +11,7 @@ variables:
   sqlServerName: 'mySqlServerRGMigration'
   sqlDatabaseName: 'myDatabaseRGMigration'
   sqlAdminUser: 'sqlAdmin'
-  sqlAdminPassword: '12345Pass!' # Store this securely in the pipeline's variable group
+  sqlAdminPassword: '12345Pass!'
 
 stages:
 - stage: InfrastructureSetup
