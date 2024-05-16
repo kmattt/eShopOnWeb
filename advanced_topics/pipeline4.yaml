@@ -70,7 +70,7 @@ stages:
 
     - script: |
         # Copy alembic.ini to the current working directory and set the connection string
-        cp path/to/alembic.ini ./
+        cp ./alembic.ini ./
         sed -i 's/^sqlalchemy.url = .*/sqlalchemy.url = mysql+pymysql:\/\/$(sqlAdminUser):$(sqlAdminPassword)@$(sqlServerName).database.windows.net\/$(sqlDatabaseName)/' alembic.ini
       displayName: 'Set Alembic Config'
 
