@@ -5,7 +5,7 @@ variables:
   azureServiceConnection: 'MyAzureServiceConnection'
   resourceGroup: 'RG2a'
   appServiceName: 'WebAppRG2a'
-  storageAccountName: 'StorageAccountRG2a'
+  storageAccountName: 'storageaccountrg2a'
   environmentName: 'production'
   functionAppName: 'FuncAppRG2a'
   location: 'westeurope'
