@@ -43,12 +43,19 @@ stages:
         echo "##vso[task.setvariable variable=BuildConfiguration]Release"
       displayName: 'Set Build Configuration Variable'
   
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/1'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/drop1.zip'
+        replaceExistingArchive: true
+
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop1.zip'
         ArtifactName: 'drop'
         publishLocation: 'Container'
-        StoreAsTar: true
 
 - stage: Deploy
   displayName: 'Deploy Stage'
