@@ -40,6 +40,11 @@ stages:
         dir
       displayName: 'List Files in Current Directory'
 
+    - script: |
+        echo "Listing files in the MyProject directory"
+        dir MyProject
+      displayName: 'List Files in MyProject Directory'
+
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -91,6 +96,16 @@ stages:
         version: '6.x'  # Specify the latest .NET 6 SDK version
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
 
+    - script: |
+        echo "Listing files in the sources directory"
+        dir $(Build.SourcesDirectory)
+      displayName: 'List Files in Sources Directory'
+
+    - script: |
+        echo "Listing files in the MyProject directory"
+        dir $(Build.SourcesDirectory)/MyProject
+      displayName: 'List Files in MyProject Directory'
+
     - task: PowerShell@2
       inputs:
         targetType: 'inline'
@@ -120,7 +135,7 @@ stages:
 
     - script: |
         echo "Running tests"
-        dotnet test MyProject/MyProject.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage"
+        dotnet test $(Build.SourcesDirectory)/MyProject/MyProject.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage"
       displayName: 'Run Tests'
 
 - stage: Troubleshoot
