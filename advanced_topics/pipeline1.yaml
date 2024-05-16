@@ -91,12 +91,7 @@ stages:
         buildType: 'current'
         downloadType: 'single'
         artifactName: 'MyProjectArtifact'
-        downloadPath: '$(System.ArtifactsDirectory)/MyProject'
-
-    - script: |
-        echo "Listing files in the downloaded artifact directory"
-        dir "$(Pipeline.Workspace)\MyProject"
-      displayName: 'List Files in Downloaded Artifact Directory'
+        downloadPath: '$(System.ArtifactsDirectory)'
 
     - task: UseDotNet@2
       inputs:
@@ -133,7 +128,7 @@ stages:
 
     - script: |
         echo "Running tests"
-        dotnet test "$(Pipeline.Workspace)\MyProject\MyProject.csproj" --no-restore --configuration Release --collect:"XPlat Code Coverage"
+        dotnet test "$(Pipeline.Workspace)\MyProjectArtifact\MyProject.csproj" --no-restore --configuration Release --collect:"XPlat Code Coverage"
       displayName: 'Run Tests'
 
 - stage: Troubleshoot
