@@ -4,11 +4,11 @@ trigger:
       - main
 
 variables:
-  azureServiceConnection: 'your-azure-service-connection'
-  resourceGroupName: 'your-resource-group'
-  appName: 'your-app-name'
-  appServicePlanName: 'your-app-service-plan'
-  location: 'your-location'  # e.g., eastus
+  azureServiceConnection: 'MyAzureServiceConnection'
+  resourceGroupName: 'RG-Deployments'
+  appName: 'WebApp-RG-Deployments'
+  appServicePlanName: 'ASP-RG-Deployments'
+  location: 'westeurope'
   blueSlotName: 'blue'
   greenSlotName: 'green'
   canarySlotName: 'canary'
@@ -147,9 +147,9 @@ jobs:
         # Add your database migration scripts here
         # Example: flyway migrate or custom scripts
         # flyway -url=jdbc:mysql://your-database-url -user=your-db-user -password=your-db-password migrate
-    displayName: 'Execute Database Migration'
+      displayName: 'Execute Database Migration'
 
-- job: Canary
+- job: CanaryDeployment
   displayName: 'Canary Deployment'
   dependsOn: DeployWebsite3
   pool:
@@ -163,11 +163,11 @@ jobs:
         appName: $(appName)
         slotName: $(canarySlotName)
         package: '$(Pipeline.Workspace)/website3'
-    displayName: 'Deploy to Canary Slot and Monitor'
+      displayName: 'Deploy to Canary Slot and Monitor'
 
 - job: SwapSlots
   displayName: 'Blue-Green Deployment Swap'
-  dependsOn: Canary
+  dependsOn: CanaryDeployment
   pool:
     vmImage: 'ubuntu-latest'
   steps:
@@ -178,7 +178,7 @@ jobs:
         scriptLocation: 'inlineScript'
         inlineScript: |
           az webapp deployment slot swap --resource-group $(resourceGroupName) --name $(appName) --slot $(blueSlotName) --target-slot $(greenSlotName)
-    displayName: 'Swap Blue and Green Slots'
+      displayName: 'Swap Blue and Green Slots'
 
 - job: MonitorAndAudit
   displayName: 'Monitoring and Auditing'
@@ -194,4 +194,4 @@ jobs:
     - script: |
         # Add your auditing scripts here
         echo "Auditing complete."
-    displayName: 'Setup Monitoring and Auditing'
+      displayName: 'Setup Monitoring and Auditing'
