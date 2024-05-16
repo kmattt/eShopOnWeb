@@ -51,7 +51,7 @@ stages:
     - script: |
         mkdir -p $(Build.ArtifactStagingDirectory)
         echo "Copying build output from $d/bin/Release"
-        cp -r $d/bin/Release/* $(Build.ArtifactStagingDirectory)
+        cp -r $d/* $(Build.ArtifactStagingDirectory)
       displayName: 'Copy Build Output to Staging Directory'
   
     - task: ArchiveFiles@2
