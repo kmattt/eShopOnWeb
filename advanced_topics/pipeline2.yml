@@ -1,34 +1,34 @@
 trigger:
-- main
+- main  # Trigger the pipeline on changes to the main branch
 
 variables:
-  azureServiceConnection: 'MyAzureServiceConnection'
-  resourceGroup: 'RG2a'
-  appServiceName: 'WebAppRG2a'
-  storageAccountName: 'storageaccountrg2a'
-  environmentName: 'production'
-  functionAppName: 'FuncAppRG2a'
-  location: 'westeurope'
+  azureServiceConnection: 'MyAzureServiceConnection'  # Service connection for Azure
+  resourceGroup: 'RG2a'  # Resource group name
+  appServiceName: 'WebAppRG2a'  # Name of the Azure App Service
+  storageAccountName: 'storageaccountrg2a'  # Name of the Azure Storage Account
+  environmentName: 'production'  # Environment name for deployment
+  functionAppName: 'FuncAppRG2a'  # Name of the Azure Function App
+  location: 'westeurope'  # Azure region for deployment
 
 stages:
 - stage: Build
-  displayName: 'Build Stage'
+  displayName: 'Build Stage'  # Display name for the build stage
   jobs:
   - job: BuildJob
-    displayName: 'Build Job'
+    displayName: 'Build Job'  # Display name for the build job
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
     steps:
     - task: UseDotNet@2
       inputs:
-        packageType: 'sdk'
-        version: '5.x'
-        installationPath: $(Agent.ToolsDirectory)/dotnet
+        packageType: 'sdk'  # Install the .NET SDK
+        version: '5.x'  # Use .NET version 5.x
+        installationPath: $(Agent.ToolsDirectory)/dotnet  # Install path for .NET SDK
 
     - script: |
         echo "Listing files in the current directory:"
         ls -la
-      displayName: 'List Files in Build Directory'
+      displayName: 'List Files in Build Directory'  # List all files in the current directory
 
     - script: |
         for d in */ ; do
@@ -37,11 +37,11 @@ stages:
             dotnet build "$d" --configuration Release
           fi
         done
-      displayName: 'Build Projects'
+      displayName: 'Build Projects'  # Build all projects that have a project.json file
 
     - script: |
         echo "##vso[task.setvariable variable=BuildConfiguration]Release"
-      displayName: 'Set Build Configuration Variable'
+      displayName: 'Set Build Configuration Variable'  # Set the build configuration to Release
 
     - script: |
         echo "Listing build output directories:"
@@ -58,64 +58,63 @@ stages:
 
         echo "Contents of artifact staging directory:"
         ls -la $artifactStagingDirectory
-      displayName: 'Copy Build Output to Staging Directory'
+      displayName: 'Copy Build Output to Staging Directory'  # Copy build outputs to the staging directory
 
     - task: ArchiveFiles@2
       inputs:
-        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
-        includeRootFolder: true
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/drop1.zip'
-        replaceExistingArchive: true
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'  # Path to the root folder to archive
+        includeRootFolder: true  # Include the root folder in the archive
+        archiveType: 'zip'  # Archive type: zip
+        archiveFile: '$(Build.ArtifactStagingDirectory)/drop1.zip'  # Path to the archive file
+        replaceExistingArchive: true  # Replace existing archive if it exists
 
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop1.zip'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
-
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop1.zip'  # Path to the file to publish
+        ArtifactName: 'drop'  # Name of the artifact
+        publishLocation: 'Container'  # Publish location: Container (Azure DevOps)
 
 - stage: Deploy
-  displayName: 'Deploy Stage'
-  dependsOn: Build
-  condition: succeeded()
+  displayName: 'Deploy Stage'  # Display name for the deploy stage
+  dependsOn: Build  # This stage depends on the build stage
+  condition: succeeded()  # Run this stage only if the build stage succeeded
   jobs:
   - deployment: DeployJob
-    displayName: 'Deploy Job'
-    environment: $(environmentName)
+    displayName: 'Deploy Job'  # Display name for the deploy job
+    environment: $(environmentName)  # Target environment for deployment
     strategy:
       runOnce:
         deploy:
           steps:
           - script: |
               echo "Deploying to Azure App Service"
-            displayName: 'Deploy Script'
-            
+            displayName: 'Deploy Script'  # Echo deployment message
+
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: '$(azureServiceConnection)'
-              appType: 'webApp'
-              appName: '$(appServiceName)'
-              package: '$(Build.ArtifactStagingDirectory)/*.zip'
-              deploymentMethod: 'auto'
-            displayName: 'Azure Web App Deploy'
-            condition: eq(variables['BuildConfiguration'], 'Release')
+              azureSubscription: '$(azureServiceConnection)'  # Azure service connection
+              appType: 'webApp'  # Type of app: web app
+              appName: '$(appServiceName)'  # Name of the web app
+              package: '$(Build.ArtifactStagingDirectory)/*.zip'  # Path to the package to deploy
+              deploymentMethod: 'auto'  # Deployment method: auto
+            displayName: 'Azure Web App Deploy'  # Deploy to Azure Web App
+            condition: eq(variables['BuildConfiguration'], 'Release')  # Deploy only if build configuration is Release
 
           - task: AzureCLI@2
             inputs:
-              azureSubscription: $(azureServiceConnection)
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
+              azureSubscription: $(azureServiceConnection)  # Azure service connection
+              scriptType: 'bash'  # Script type: bash
+              scriptLocation: 'inlineScript'  # Script location: inline script
               inlineScript: |
                 az storage account show -n $(storageAccountName) -g $(resourceGroup)
-            displayName: 'Check Storage Account'
-            condition: eq(variables['BuildConfiguration'], 'Release')
+            displayName: 'Check Storage Account'  # Check if the storage account exists
+            condition: eq(variables['BuildConfiguration'], 'Release')  # Run only if build configuration is Release
 
           - task: AzureCLI@2
             inputs:
-              azureSubscription: $(azureServiceConnection)
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
+              azureSubscription: $(azureServiceConnection)  # Azure service connection
+              scriptType: 'bash'  # Script type: bash
+              scriptLocation: 'inlineScript'  # Script location: inline script
               inlineScript: |
                 # Create the resource group if it doesn't exist
                 az group create --name $(resourceGroup) --location $(location)
@@ -125,46 +124,46 @@ stages:
 
                 # Create the function app if it doesn't exist
                 az functionapp create --resource-group $(resourceGroup) --consumption-plan-location $(location) --runtime dotnet --functions-version 4 --name $(functionAppName) --storage-account $(storageAccountName)
-            displayName: 'Create Azure Function App/RG/SA'
+            displayName: 'Create Azure Function App/RG/SA'  # Create Azure Function App, Resource Group, and Storage Account
 
 - stage: Approval2
-  displayName: 'Post-Deployment Approval'
+  displayName: 'Post-Deployment Approval'  # Display name for the post-deployment approval stage
   jobs:
   - deployment: DeployJob
-    displayName: 'Deploy Job'
-    environment: $(environmentName)
+    displayName: 'Deploy Job'  # Display name for the deploy job
+    environment: $(environmentName)  # Target environment for deployment
     strategy:
       runOnce:
         deploy:
           steps:
           - script: |
               echo "Validating approval..."
-            displayName: 'Confirmation of approval'
+            displayName: 'Confirmation of approval'  # Echo validation of approval
 
 - stage: PostApproval
-  displayName: 'Post Approval Stage'
-  dependsOn: Approval2
-  condition: succeeded()
+  displayName: 'Post Approval Stage'  # Display name for the post-approval stage
+  dependsOn: Approval2  # This stage depends on the approval stage
+  condition: succeeded()  # Run this stage only if the approval stage succeeded
   jobs:
   - job: PostApprovalJob
-    displayName: 'Post Approval Job'
+    displayName: 'Post Approval Job'  # Display name for the post-approval job
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-latest'  # Use the latest Ubuntu VM image
     steps:
     - script: echo "Deployment approved, proceeding with post-approval steps."
-      displayName: 'Post-Approval Script'
+      displayName: 'Post-Approval Script'  # Echo post-approval steps
 
     - task: DownloadBuildArtifacts@1
       inputs:
-        buildType: 'current'
-        downloadType: 'single'
-        artifactName: 'drop'
-        downloadPath: '$(Build.ArtifactStagingDirectory)'
+        buildType: 'current'  # Download artifacts from the current build
+        downloadType: 'single'  # Download a single artifact
+        artifactName: 'drop'  # Name of the artifact to download
+        downloadPath: '$(Build.ArtifactStagingDirectory)'  # Path to download the artifact to
 
     - task: AzureFunctionApp@1
       inputs:
-        azureSubscription: $(azureServiceConnection)
-        appType: 'functionApp'
-        appName: $(functionAppName)
-        package: $(Build.ArtifactStagingDirectory)/drop/*.zip
-      displayName: 'Deploy to Azure Function App'
+        azureSubscription: $(azureServiceConnection)  # Azure service connection
+        appType: 'functionApp'  # Type of app: function app
+        appName: $(functionAppName)  # Name of the function app
+        package: $(Build.ArtifactStagingDirectory)/drop/*.zip  # Path to the package to deploy
+      displayName: 'Deploy to Azure Function App'  # Deploy to Azure Function App
