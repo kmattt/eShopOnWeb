@@ -30,6 +30,10 @@ stages:
         version: '6.x'  # Specify the latest .NET 6 SDK version
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
 
+    - script: |
+        mkdir -p build  # Ensure the build directory exists
+      displayName: 'Create Build Directory'
+
     - task: Cache@2
       inputs:
         key: 'nuget | "$(Agent.OS)" | build/nuget.config'
@@ -65,6 +69,10 @@ stages:
         packageType: 'sdk'
         version: '6.x'  # Specify the latest .NET 6 SDK version
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
+
+    - script: |
+        mkdir -p test  # Ensure the test directory exists
+      displayName: 'Create Test Directory'
 
     - task: Cache@2
       inputs:
