@@ -24,8 +24,14 @@ stages:
         installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - script: |
+        echo "Listing files in the current directory:"
+        ls -la
+      displayName: 'List Files in Build Directory'
+
+    - script: |
         for d in */ ; do
           if [ -f "$d/project.json" ]; then
+            echo "Building project in directory $d"
             dotnet build "$d" --configuration Release
           fi
         done
@@ -53,11 +59,9 @@ stages:
             
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: '$(azureServiceConnection)'
-              appType: 'webApp'
-              appName: '$(appServiceName)'
-              package: '$(Build.ArtifactStagingDirectory)/*.zip'
-              deploymentMethod: 'auto'
+              azureSubscription: $(azureServiceConnection)
+              appName: $(appServiceName)
+              package: $(Build.ArtifactStagingDirectory)/*.zip
             displayName: 'Azure Web App Deploy'
             condition: eq(variables['BuildConfiguration'], 'Release')
 
