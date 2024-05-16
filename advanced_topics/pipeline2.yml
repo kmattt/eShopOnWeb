@@ -2,10 +2,11 @@ trigger:
 - main
 
 variables:
-  azureSubscription: 'your-azure-subscription'
-  resourceGroup: 'your-resource-group'
-  appServiceName: 'your-app-service-name'
-  storageAccountName: 'your-storage-account-name'
+  azureServiceConnection: 'MyAzureServiceConnection'
+  resourceGroup: 'RG2a'
+  appServiceName: 'WebAppRG2a'
+  storageAccountName: 'StorageAccountRG2a'
+  environmentName: 'production'
 
 stages:
 - stage: Build
@@ -37,7 +38,7 @@ stages:
   jobs:
   - deployment: DeployJob
     displayName: 'Deploy Job'
-    environment: 'production'
+    environment: $(environmentName)
     strategy:
       runOnce:
         deploy:
@@ -48,7 +49,7 @@ stages:
             
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: $(azureSubscription)
+              azureSubscription: $(azureServiceConnection)
               appName: $(appServiceName)
               package: $(Build.ArtifactStagingDirectory)/*.zip
             displayName: 'Azure Web App Deploy'
@@ -56,7 +57,7 @@ stages:
 
           - task: AzureCLI@2
             inputs:
-              azureSubscription: $(azureSubscription)
+              azureSubscription: $(azureServiceConnection)
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
@@ -64,26 +65,10 @@ stages:
             displayName: 'Check Storage Account'
             condition: eq(variables['BuildConfiguration'], 'Release')
 
-- stage: ManualApproval
-  displayName: 'Manual Approval Stage'
-  dependsOn: Deploy
-  condition: succeeded()
-  jobs:
-  - job: ApprovalJob
-    displayName: 'Manual Approval Job'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: ManualValidation@0
-      inputs:
-        instructions: 'Please review the deployment and approve to proceed.'
-        onTimeout: 'reject'
-      displayName: 'Manual Approval Check'
-
 - stage: PostApproval
   displayName: 'Post Approval Stage'
-  dependsOn: ManualApproval
-  condition: and(succeeded(), eq(dependencies.ManualApproval.outputs['ManualValidation.ApprovalJob.approvalStatus'], 'approved'))
+  dependsOn: Deploy
+  condition: succeeded()
   jobs:
   - job: PostApprovalJob
     displayName: 'Post Approval Job'
@@ -95,7 +80,7 @@ stages:
 
     - task: AzureFunctionApp@1
       inputs:
-        azureSubscription: $(azureSubscription)
+        azureSubscription: $(azureServiceConnection)
         appType: 'functionApp'
         appName: 'your-function-app-name'
         package: $(Build.ArtifactStagingDirectory)/*.zip
