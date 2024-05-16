@@ -5,13 +5,13 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  azureServiceConnection: 'MyAzureServiceConnection'
-  resourceGroup: 'RG-Migration'
-  location: 'eastus'
-  sqlServerName: 'mySqlServerRGMigration'
-  sqlDatabaseName: 'myDatabaseRGMigration'
-  sqlAdminUser: 'sqlAdmin'
-  sqlAdminPassword: '12345Pass!'
+  azureServiceConnection: 'MyAzureServiceConnection' # Service connection to Azure
+  resourceGroup: 'myResourceGroup'                   # Resource group name
+  location: 'East US'                                # Location for the resources
+  sqlServerName: 'mySqlServer'                       # SQL Server name
+  sqlDatabaseName: 'myDatabase'                      # SQL Database name
+  sqlAdminUser: 'sqlAdmin'                           # SQL Admin username
+  sqlAdminPassword: '12345Pass!'                     # SQL Admin password (stored securely)
 
 stages:
 - stage: InfrastructureSetup
@@ -27,6 +27,7 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          # Create an Azure resource group
           az group create --name $(resourceGroup) --location $(location)
     
     - task: AzureCLI@2
@@ -36,6 +37,7 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          # Create an Azure SQL Server
           az sql server create --name $(sqlServerName) --resource-group $(resourceGroup) --location $(location) --admin-user $(sqlAdminUser) --admin-password $(sqlAdminPassword)
 
     - task: AzureCLI@2
@@ -45,6 +47,7 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
+          # Create an Azure SQL Database within the created server
           az sql db create --resource-group $(resourceGroup) --server $(sqlServerName) --name $(sqlDatabaseName) --service-objective S0
 
 - stage: DatabaseMigrations
@@ -58,17 +61,23 @@ stages:
       inputs:
         versionSpec: '3.x'
         addToPath: true
-    
+
     - script: |
+        # Upgrade pip and install Alembic for database migrations
         python -m pip install --upgrade pip
         pip install alembic
       displayName: 'Install Alembic'
 
     - script: |
+        # Copy alembic.ini to the current working directory and set the connection string
+        cp path/to/alembic.ini ./
+        sed -i 's/^sqlalchemy.url = .*/sqlalchemy.url = mysql+pymysql:\/\/$(sqlAdminUser):$(sqlAdminPassword)@$(sqlServerName).database.windows.net\/$(sqlDatabaseName)/' alembic.ini
+      displayName: 'Set Alembic Config'
+
+    - script: |
+        # Run Alembic migrations to update the database schema
         alembic upgrade head
       displayName: 'Run Migrations'
-      env:
-        DATABASE_URL: "mysql+pymysql://$(sqlAdminUser):$(sqlAdminPassword)@$(sqlServerName).database.windows.net/$(sqlDatabaseName)"
 
 - stage: DeployApp
   displayName: 'Deploy Application'
