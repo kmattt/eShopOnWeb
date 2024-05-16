@@ -12,6 +12,7 @@ variables:
   sqlDatabaseName: 'mydatabase213'                      # SQL Database name
   sqlAdminUser: 'sqladmin213'                           # SQL Admin username
   sqlAdminPassword: '12345Pass!'                     # SQL Admin password (stored securely)
+  firewallRuleName: MyFWRule
 
 stages:
 - stage: InfrastructureSetup
