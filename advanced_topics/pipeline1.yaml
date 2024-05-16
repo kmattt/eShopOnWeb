@@ -27,7 +27,7 @@ stages:
     - task: UseDotNet@2
       inputs:
         packageType: 'sdk'
-        version: '6.x.x'  # Specify the .NET SDK version to use
+        version: '6.x'  # Specify the latest .NET 6 SDK version
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
 
     - task: Cache@2
@@ -60,7 +60,7 @@ stages:
     - task: UseDotNet@2
       inputs:
         packageType: 'sdk'
-        version: '6.x.x'  # Specify the .NET SDK version to use
+        version: '6.x'  # Specify the latest .NET 6 SDK version
         installationPath: $(Agent.ToolsDirectory)/dotnet  # Path where .NET SDK will be installed
 
     - task: Cache@2
