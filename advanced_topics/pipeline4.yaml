@@ -94,7 +94,7 @@ stages:
     - task: UseDotNet@2
       inputs:
         packageType: 'sdk'
-        version: '8.x.x' # Use the appropriate version that supports .NET 8.0
+        version: '8.0' # Use the appropriate version that supports .NET 8.0
         installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - task: DotNetCoreCLI@2
