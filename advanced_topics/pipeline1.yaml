@@ -44,10 +44,10 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          if (-not (Test-Path -Path build)) {
-            New-Item -ItemType Directory -Path build
+          if (-not (Test-Path -Path $(NUGET_PACKAGES))) {
+            New-Item -ItemType Directory -Path $(NUGET_PACKAGES)
           }
-      displayName: 'Create Build Directory'
+      displayName: 'Create NuGet Packages Directory'
 
     - task: Cache@2
       inputs:
@@ -58,13 +58,11 @@ stages:
           nuget | "$(Agent.OS)"
           nuget  # Fallback keys if the main key is not found
 
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'
-        script: |
-          if (-not $env:PACKAGES_CACHE_RESTORED) {
-            dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
-          }
+    - script: |
+        echo "Restore packages if cache not restored"
+        if (-not $env:PACKAGES_CACHE_RESTORED) {
+          dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)
+        }
       displayName: 'Restore Packages'
 
     - script: |
@@ -95,10 +93,10 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          if (-not (Test-Path -Path test)) {
-            New-Item -ItemType Directory -Path test
+          if (-not (Test-Path -Path $(NUGET_PACKAGES))) {
+            New-Item -ItemType Directory -Path $(NUGET_PACKAGES)
           }
-      displayName: 'Create Test Directory'
+      displayName: 'Create NuGet Packages Directory'
 
     - task: Cache@2
       inputs:
@@ -109,13 +107,11 @@ stages:
           nuget | "$(Agent.OS)"
           nuget  # Fallback keys if the main key is not found
 
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'
-        script: |
-          if (-not $env:PACKAGES_CACHE_RESTORED) {
-            dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
-          }
+    - script: |
+        echo "Restore packages if cache not restored"
+        if (-not $env:PACKAGES_CACHE_RESTORED) {
+          dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)
+        }
       displayName: 'Restore Packages'
 
     - script: |
