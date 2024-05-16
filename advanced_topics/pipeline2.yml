@@ -127,21 +127,23 @@ stages:
                 az functionapp create --resource-group $(resourceGroup) --consumption-plan-location $(location) --runtime dotnet --functions-version 4 --name $(functionAppName) --storage-account $(storageAccountName)
             displayName: 'Create Azure Function App/RG/SA'
 
-- stage: ManualApproval
-  displayName: 'Manual Approval Stage'
-  dependsOn: Deploy
+- stage: Approval2
+  displayName: 'Post-Deployment Approval'
   jobs:
-  - job: ApprovalJob
-    displayName: 'Manual Approval Job'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: echo "Manual approval required."
-      displayName: 'Manual Approval Script'
+  - deployment: DeployJob
+    displayName: 'Deploy Job'
+    environment: $(environmentName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              echo "Validating approval..."
+            displayName: 'Confirmation of approval'
 
 - stage: PostApproval
   displayName: 'Post Approval Stage'
-  dependsOn: ManualApproval
+  dependsOn: Approval2
   condition: succeeded()
   jobs:
   - job: PostApprovalJob
