@@ -8,9 +8,9 @@ variables:
   azureServiceConnection: 'MyAzureServiceConnection' # Service connection to Azure
   resourceGroup: 'myResourceGroup'                   # Resource group name
   location: 'eastus'                                 # Location for the resources
-  sqlServerName: 'mysqlserver213'                       # SQL Server name
-  sqlDatabaseName: 'mydatabase213'                      # SQL Database name
-  sqlAdminUser: 'sqladmin213'                           # SQL Admin username
+  sqlServerName: 'mySqlServer'                       # SQL Server name
+  sqlDatabaseName: 'myDatabase'                      # SQL Database name
+  sqlAdminUser: 'sqlAdmin'                           # SQL Admin username
   sqlAdminPassword: '12345Pass!'                     # SQL Admin password (stored securely)
 
 stages:
@@ -63,7 +63,7 @@ stages:
       displayName: 'Install Flyway CLI'
 
     - script: |
-        flyway -url=jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName) -user=$(sqlAdminUser) -password=$(sqlAdminPassword) -locations=filesystem:sql migrate
+        flyway -url=jdbc:sqlserver://$(FLYWAY_URL) -user=$(FLYWAY_USER) -password=$(FLYWAY_PASSWORD) -locations=filesystem:sql migrate
       displayName: 'Run Flyway Migrations'
       env:
         FLYWAY_URL: "jdbc:sqlserver://$(sqlServerName).database.windows.net:1433;databaseName=$(sqlDatabaseName)"
