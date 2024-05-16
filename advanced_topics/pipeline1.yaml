@@ -32,14 +32,17 @@ stages:
 
     - task: Cache@2
       inputs:
-        key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'  # Cache key
+        key: 'nuget | "$(Agent.OS)" | build/nuget.config'
         path: $(NUGET_PACKAGES)  # Path to store cached packages
+        cacheHitVar: 'PACKAGES_CACHE_RESTORED'  # Variable to check if the cache was restored
         restoreKeys: |
           nuget | "$(Agent.OS)"
           nuget  # Fallback keys if the main key is not found
 
     - script: |
-        dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages
+        if [ -z "$(PACKAGES_CACHE_RESTORED)" ]; then
+          dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
+        fi
       displayName: 'Restore Packages'
 
     - script: |
@@ -65,14 +68,17 @@ stages:
 
     - task: Cache@2
       inputs:
-        key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'  # Cache key
+        key: 'nuget | "$(Agent.OS)" | test/nuget.config'
         path: $(NUGET_PACKAGES)  # Path to store cached packages
+        cacheHitVar: 'PACKAGES_CACHE_RESTORED'  # Variable to check if the cache was restored
         restoreKeys: |
           nuget | "$(Agent.OS)"
           nuget  # Fallback keys if the main key is not found
 
     - script: |
-        dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages
+        if [ -z "$(PACKAGES_CACHE_RESTORED)" ]; then
+          dotnet restore --disable-parallel --packages $(NUGET_PACKAGES)  # Restore packages if cache not restored
+        fi
       displayName: 'Restore Packages'
 
     - script: |
