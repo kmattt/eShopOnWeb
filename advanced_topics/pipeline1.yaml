@@ -86,14 +86,12 @@ stages:
     workspace:
       clean: all  # Clean the workspace before starting the job
     steps:
-    - download: current
-      artifact: MyProjectArtifact
-      displayName: 'Download Project Artifact'
-
-    - script: |
-        echo "Listing files in the current directory"
-        dir
-      displayName: 'List Files in Current Directory'
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'MyProjectArtifact'
+        downloadPath: '$(System.ArtifactsDirectory)/MyProject'
 
     - script: |
         echo "Listing files in the downloaded artifact directory"
