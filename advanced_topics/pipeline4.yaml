@@ -115,6 +115,7 @@ stages:
         arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)'
 
     - task: AzureCLI@2
+      condition: Eq(1,0)
       displayName: 'Create App Service Plan'
       inputs:
         azureSubscription: $(azureServiceConnection)
@@ -124,6 +125,7 @@ stages:
           az appservice plan create --name $(appServicePlan) --resource-group $(resourceGroup) --location $(location) --sku B1
   
     - task: AzureCLI@2
+      condition: Eq(1,0)
       displayName: 'Create App Service'
       inputs:
         azureSubscription: $(azureServiceConnection)
