@@ -5,15 +5,15 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  azureServiceConnection: 'MyAzureServiceConnection' # Service connection to Azure
-  resourceGroup: 'myResourceGroup'                   # Resource group name
-  location: 'eastus'                                 # Location for the resources
-  sqlServerName: 'mysqlserver213'                    # SQL Server name
-  sqlDatabaseName: 'mydatabase213'                   # SQL Database name
-  sqlAdminUser: 'sqladmin213'                        # SQL Admin username
-  sqlAdminPassword: '12345Pass!'                     # SQL Admin password (stored securely)
-  appServicePlan: 'asp-213a'                         # App Service Plan name
-  appServiceName: 'app-service-213a'                 # App Service name
+  azureServiceConnection: 'MyAzureServiceConnection'
+  resourceGroup: 'myResourceGroup'
+  location: 'eastus'
+  sqlServerName: 'mysqlserver213'
+  sqlDatabaseName: 'mydatabase213'
+  sqlAdminUser: 'sqladmin213'
+  sqlAdminPassword: '12345Pass!'
+  appServicePlan: 'asp-213a'
+  appServiceName: 'app-service-213a'
   firewallRuleName: MyFWRule
 
 stages:
@@ -30,7 +30,6 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          # Create an Azure resource group
           az group create --name $(resourceGroup) --location $(location)
     
     - task: AzureCLI@2
@@ -40,7 +39,6 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          # Create an Azure SQL Server
           az sql server create --name $(sqlServerName) --resource-group $(resourceGroup) --location $(location) --admin-user $(sqlAdminUser) --admin-password $(sqlAdminPassword)
 
     - task: AzureCLI@2
@@ -50,7 +48,6 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          # Create an Azure SQL Database within the created server
           az sql db create --resource-group $(resourceGroup) --server $(sqlServerName) --name $(sqlDatabaseName) --service-objective S0
 
 - stage: DatabaseMigrations
@@ -66,10 +63,8 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # Fetch the current IP address
           MY_IP=$(curl -s http://ipinfo.io/json | jq -r '.ip')
           echo "My IP is $MY_IP"
-          # Add the IP address to the SQL Server firewall rules
           az sql server firewall-rule create --resource-group $(resourceGroup) --server $(sqlServerName) --name $(firewallRuleName) --start-ip-address $MY_IP --end-ip-address $MY_IP
       displayName: 'Add IP to SQL Server Firewall'
 
@@ -96,7 +91,7 @@ stages:
     - task: UseDotNet@2
       inputs:
         packageType: 'sdk'
-        version: '8.0.x' # Use the appropriate version that supports .NET 8.0
+        version: '8.0.x'
         installationPath: $(Agent.ToolsDirectory)/dotnet
 
     - task: DotNetCoreCLI@2
@@ -126,7 +121,6 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          # Create an App Service Plan
           az appservice plan create --name $(appServicePlan) --resource-group $(resourceGroup) --location $(location) --sku B1
   
     - task: AzureCLI@2
@@ -136,8 +130,15 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          # Create an App Service
           az webapp create --name $(appServiceName) --plan $(appServicePlan) --resource-group $(resourceGroup)
+
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(appServiceName).zip'
+        replaceExistingArchive: true
 
     - task: AzureWebApp@1
       displayName: 'Deploy to Azure Web App'
@@ -145,4 +146,4 @@ stages:
         azureSubscription: $(azureServiceConnection)
         appType: 'webApp'
         appName: '$(appServiceName)'
-        package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+        package: '$(Build.ArtifactStagingDirectory)/$(appServiceName).zip'
