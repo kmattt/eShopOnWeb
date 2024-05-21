@@ -1,6 +1,3 @@
-Here's the annotated version of your Azure DevOps pipeline with comments explaining each step:
-
-```yaml
 trigger:
 - main  # Trigger the pipeline on changes to the main branch
 
@@ -167,4 +164,3 @@ stages:
         appName: '$(appServiceName)'
         package: '$(Build.ArtifactStagingDirectory)/$(appServiceName).zip'
       # Deploy the application zip package to the Azure Web App (this step is currently disabled with Eq(1,0) condition)
-```
