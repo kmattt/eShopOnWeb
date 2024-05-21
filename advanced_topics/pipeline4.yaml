@@ -124,7 +124,6 @@ stages:
       # Publish the .NET Core project to the artifact staging directory
 
     - task: AzureCLI@2
-      condition: Eq(1,0)
       displayName: 'Create App Service Plan'
       inputs:
         azureSubscription: $(azureServiceConnection)
@@ -135,7 +134,6 @@ stages:
       # Create an App Service Plan (this step is currently disabled with Eq(1,0) condition)
 
     - task: AzureCLI@2
-      condition: Eq(1,0)
       displayName: 'Create App Service'
       inputs:
         azureSubscription: $(azureServiceConnection)
@@ -146,7 +144,6 @@ stages:
       # Create an App Service (this step is currently disabled with Eq(1,0) condition)
 
     - task: ArchiveFiles@2
-      condition: Eq(1,0)
       inputs:
         rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
         includeRootFolder: false
@@ -156,7 +153,6 @@ stages:
       # Archive the published project files into a zip file
 
     - task: AzureWebApp@1
-      condition: Eq(1,0)
       displayName: 'Deploy to Azure Web App'
       inputs:
         azureSubscription: $(azureServiceConnection)
