@@ -1,5 +1,5 @@
 ﻿// Nasz pierwszy PR
-
+// Pracujemy aktualnie nad zadaniem nr. 2
 using System.Net.Mime;
 using Ardalis.ListStartupServices;
 using Azure.Identity;
