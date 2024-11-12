@@ -1,4 +1,6 @@
-﻿using System.Net.Mime;
+﻿// Nasz pierwszy PR
+
+using System.Net.Mime;
 using Ardalis.ListStartupServices;
 using Azure.Identity;
 using BlazorAdmin;
