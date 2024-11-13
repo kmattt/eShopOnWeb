@@ -14,8 +14,7 @@ stages:
   displayName: Build .Net Core Solution
   jobs:
   - job: Build
-    pool:
-      agent: windows-latest
+    pool: Azure Pipelines
     steps:
     - checkout: self
       fetchDepth: 0
