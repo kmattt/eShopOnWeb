@@ -14,7 +14,8 @@ stages:
   displayName: Build .Net Core Solution
   jobs:
   - job: Build
-    pool: Azure Pipelines
+    pool: 
+      vmImage: windows-latest
     steps:
     - checkout: self
       fetchDepth: 0
