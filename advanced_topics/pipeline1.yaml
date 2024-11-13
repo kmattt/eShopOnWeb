@@ -1,8 +1,7 @@
 trigger:
 - main  # Trigger the pipeline on changes to the main branch
 
-pool:
-  vmImage: 'windows-latest'  # Use Microsoft-hosted agents with the latest Windows image
+pool: selfhostedpool
 
 variables:
   # Cache key and paths
@@ -13,8 +12,7 @@ stages:
   jobs:
   - job: SetupAndBuild
     displayName: 'Setup and Build Job'
-    pool:
-      vmImage: 'windows-latest'  # Use Microsoft-hosted agent
+    pool: selfhostedpool
     workspace:
       clean: all  # Clean the workspace before starting the job
     steps:
@@ -136,8 +134,7 @@ stages:
   jobs:
   - job: Troubleshoot
     displayName: 'Troubleshooting Job'
-    pool:
-      vmImage: 'windows-latest'  # Use Microsoft-hosted agent
+    pool: selfhostedpool
     steps:
     - script: echo "Gathering logs and troubleshooting information..."
       displayName: 'Troubleshoot Steps'
