@@ -1,5 +1,4 @@
-﻿// Nasz pierwszy PR
-// Pracujemy aktualnie nad zadaniem nr. 2
+﻿// Nasz drugi Pull Reguest
 using System.Net.Mime;
 using Ardalis.ListStartupServices;
 using Azure.Identity;
