@@ -1,7 +1,13 @@
 resources:
   repositories:
     - repository: self
-      trigger: none
+      trigger:
+        branches:
+          include:
+          - main
+        paths:
+          include:
+          - src/web/*
 
 stages:
 - stage: Build
@@ -10,8 +16,6 @@ stages:
   - job: Build
     pool:
       name: selfhostedpool
-      demands:
-      - agent.name -equals shubuntu
     steps:
     - checkout: self
       fetchDepth: 0
