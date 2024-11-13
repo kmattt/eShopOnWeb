@@ -1,4 +1,5 @@
 ﻿// Nasz drugi Pull Reguest
+// Testowanie CI
 using System.Net.Mime;
 using Ardalis.ListStartupServices;
 using Azure.Identity;
