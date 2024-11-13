@@ -15,7 +15,7 @@ stages:
   jobs:
   - job: Build
     pool:
-      name: selfhostedpool
+      agent: windows-latest
     steps:
     - checkout: self
       fetchDepth: 0
