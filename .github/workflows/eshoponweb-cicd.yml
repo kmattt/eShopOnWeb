@@ -11,7 +11,7 @@ env:
   SUBSCRIPTION-ID: cc46f1e4-6a72-4158-b845-8dde05d89da2
   WEBAPP-NAME: naszwebappdotestu213
 
-
+#test
 jobs:
   #Build, test and publish .net web project in repository
   buildandtest:
